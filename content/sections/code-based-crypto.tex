@@ -1,0 +1,80 @@
+\subsection{Úvod}
+	\noindent
+		Jednu triedu z postkvantovıch kryptosystémov tvoria code-based systémy, teda kryptosystémy vychádzajúce z teórie kódovania.
+		Bezpeènos takıchto systémov je zaloená na zloitosti takzvaného dekódovacieho problému. V súèasnosti nie je známy algoritmus,
+		ktorı by efektívne dekódoval ¾ubovo¾nı kód ako na klasickom, tak aj na kvantovom poèítaèi. Existujú však triedy lineárnych kódov,
+		ktoré efektívne dekódova vieme. Tento poznatok má kryptografické vyuitie. Podstata code-based kryptosystémov je skonštruova kód,
+		ktorı vieme dekódova a následne tento kód zmodifikova na kód, ktorı dekódova nevieme bez toho, aby sme poznali "inverznú" modifikáciu.
+\subsection{McEliece a jeho varianty}
+	\noindent
+		Najstarším a pravdepodobne najznámejším code-based kryptosystémom je McEliecov kryptosystém. Jadro systému tvorí kód $C$ dlky $n$ s
+		dimenziou $k$ a minimálnou vzdialenosou $d \geq 2t + 1$, kde t je poèe chıb, ktorı vie kód opravi. Pod¾a pôvodného návrhu sa
+		pouívajú Goppove kódy, ku ktorım existuje efektívny dekódovací algoritmus.
+	\newline
+		Verejnı a súkromnı k¾úè zostrojíme nasledovne. Urèíme generujúcu maticu $G$ s rozmermi $k \times n$ pre kód $C$. 
+		Ïalej zvolíme náhodnú binárnu regulárnu maticu $S$ s rozmermi $k \times k$ a permutaènú maticu $P$ s rozmermi
+		$n \times n$. Verejnı k¾úè tvorí matica $G' = SGP$ a parameter $t$. Súkromnı k¾uè tvoria matice $S$, $G$, $P$.
+		
+		\begin{algorithm}[h]
+			\lstset{
+				basicstyle=\small\sffamily,
+				frame=none,
+				numbers=left,
+				xleftmargin=5.0ex,
+				numberstyle=\tiny,
+				stepnumber=1,
+				showstringspaces=false,
+				keywordstyle=\color{blue}\bfseries
+				}
+			\lstset{emph={%  Adjust any special keywords
+				printf%
+				},emphstyle={\color[rgb]{1,0,0}\bfseries}%
+			}%
+			\begin{lstlisting}
+Správu m dåky k vynásobíme s verejnou maticou G'.
+c' = mG'
+Ku zakódovanej správe pripoèítame náhodnı chybovı vektor s váhou t.
+c = c' + e,  wt(e) = t
+c tvorí zašifrovanı text  
+			\end{lstlisting}
+			\caption{Algoritmus šifrovania}
+			\label{McEliece-encrypt}
+		\end{algorithm}
+		
+		\begin{algorithm}[ht]
+			\lstset{
+				basicstyle=\small\sffamily,
+				frame=none,
+				numbers=left,
+				xleftmargin=5.0ex,
+				numberstyle=\tiny,
+				stepnumber=1,
+				showstringspaces=false,
+				keywordstyle=\color{blue}\bfseries
+				}
+			\lstset{emph={%  Adjust any special keywords
+				printf%
+				},emphstyle={\color[rgb]{1,0,0}\bfseries}%
+			}%
+			\begin{lstlisting}
+Správu c vynásobíme s inv(P)
+
+c = mG'inv(P) = mSG + e*inv(P)
+m' = decode(mSG + e*inv(P)) = mS;
+m = m'inv(S)
+
+m tvorí dešifrovanú správu  
+			\end{lstlisting}
+			\caption{Algoritmus dešifrovania}
+			\label{McEliece-decrypt}
+		\end{algorithm}
+		
+	\noindent
+		Pre praktickú bezpeènos sa hodnoty parametrov kódu volia pribline $n = 1000, k = 500, t = 50$.
+	
+	\noindent
+		K McEliecovmu kryptosystému existuje varianta, ktorá namiesto generujúcej matice $G$ vyuíva kontrolnú maticu $H$.
+		V tomto prípade sa správa m najskôr transformuje na vektor dåky $n$ s Hammingovou váhou $t$. A šifrovanı text tvorí
+		syndróm $c = Hx^{T}$
+		
+	
