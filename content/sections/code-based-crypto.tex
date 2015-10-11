@@ -41,7 +41,7 @@ c tvorí zašifrovanı text
 			\label{McEliece-encrypt}
 		\end{algorithm}
 		
-		\begin{algorithm}[ht]
+		\begin{algorithm}[h]
 			\lstset{
 				basicstyle=\small\sffamily,
 				frame=none,
@@ -73,8 +73,14 @@ m tvorí dešifrovanú správu
 		Pre praktickú bezpeènos sa hodnoty parametrov kódu volia pribline $n = 1000, k = 500, t = 50$.
 	
 	\noindent
-		K McEliecovmu kryptosystému existuje varianta, ktorá namiesto generujúcej matice $G$ vyuíva kontrolnú maticu $H$.
-		V tomto prípade sa správa m najskôr transformuje na vektor dåky $n$ s Hammingovou váhou $t$. A šifrovanı text tvorí
-		syndróm $c = Hx^{T}$
+		K McEliecovmu kryptosystému existuje varianta, ktorá namiesto generujúcej matice $G$ vyuíva kontrolnú maticu $H$. Táto duálna forma sa oznaèuje ako
+		Niederreiterov kryptosystém. V tomto kryptosystéme sa správa $m$ najskôr transformuje na vektor $m'$ dåky $n$ s Hammingovou váhou $t$. 
+		Verejnı k¾úè tvorí matica $H'=SHP$ a parameter $t$.	Matica $S$ je nahodná regulárna binárna matica s rozmermi $(n-k)\times(n-k)$ a 
+		$P$ je permutaèná matica s rozmermi $n \times n$ a súkromnı k¾uè tvoria	matice $S$,$H$,$P$. Šifrovanı text sa vypoèíta ako syndróm slova $m'$, $c = H'm'$$^T$
+		Na dešifrovanie slova $c$ vlastník súkromného k¾úèa najskôr vynásobi slovo $c$ maticou $S^{-1}$ z¾ava, následne aplikuje dekódovací algoritmus a vısledok vynásobí
+		maticou $P^{-1}$ z¾ava. $m = P^{-1}decode(S^{-1}SHPm)$
+		
+	\subsubsection{Porovnanie McEliece a Niederreiter}
+		Porovnanie velkosti sprav, klucov pripadne tabulka z CFS clanku
 		
 	

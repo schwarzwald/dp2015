@@ -1,6 +1,58 @@
 \subsection{Úvod} 
-	\noindent Popis ake code-base schemy existuju
+	\noindent 
+		Prechod na postkvantovú kryptografiu so sebou prináša aj potrebu implementova podpisové
+		schémy pomocou postkvantového kryptosystému. Vo všeobecnosti sa na realizáciu digitálneho
+		podpisu vyuívajú asymetrické kryptosystémy, respektíve kryptosystémy s verejnım k¾úèom.
+		Kryptosystémy, ktoré sme si predstavili v predchádzajúcej èasti spåòajú toto kritérium.
+		Všeobecnı algoritmus na vytvorenie digitálneho podpisu správy môeme zapísa nasledovne
+		
+	\begin{algorithm}[h]
+		\lstset{
+			basicstyle=\small\sffamily,
+			frame=none,
+			numbers=left,
+			xleftmargin=5.0ex,
+			numberstyle=\tiny,
+			stepnumber=1,
+			showstringspaces=false,
+			keywordstyle=\color{blue}\bfseries
+			}
+		\lstset{emph={%  Adjust any special keywords
+			printf%
+			},emphstyle={\color[rgb]{1,0,0}\bfseries}%
+			}%
+		\begin{lstlisting}
+Máme správu m, ktorú chceme podpísa a hashovaciu funkciu H
+Vypoèítame odtlaèok h = H(m)
+Vypoèítame podpis tak, e dešifrujeme odtlaèok h pomocou privátneho k¾úèa
+Podpísanú správu tvorí dvojica m a s
+		\end{lstlisting}
+		\caption{Schéma digitálneho podpisu}
+		\label{digital-signature}
+	\end{algorithm}
+
+	Monos aplikácie tejto schémy na konkrétny kryptosystém je silne závisla od toho, ako sa
+	prekrıvajú mnoiny šifrovanıch textov a odtlaèkov. Ako si ukáeme v ïalších èastiach práce,
+	nie všetky odtlaèky musia by dešifrovate¾né správy.
+
+\subsection{Preh¾ad code-based podpisovıch schém}
+	\noindent
+		Strucny opis znamych schem. CFS,  LDGM, CFS s McEliece (?)
+		Len zhrnutie. Priadne blizsie detaily v samostatne sekcii
+		
 \subsection{CFS schéma}
-	\noindent Popis ako funguje, ake parametre su navhrnute
+	\noindent 
+		Jednım z nádejnıch návrhov code-based podpisovıch schém je CFS schéma, ktorá pouíva
+		na podpisovanie Niederreiterov kryptosystém.
+		Základnı problém, ktorı treba vyrieši pri podpisovaní zaloenom na kódovaní, je ako získa takı
+		odtlaèok správy, ktorı je dekódovate¾né slovo. Ak máme lineárny kód $C(n,k,2t+1)$, syndróm slova je vektor dåky $n-k$.
+		Poèet všetkıch syndrómov je $2^{n-k}$ a poèet dekódovate¾nıch syndrómov je 
+	\newline 
+		$\sum_{i=0}^{t}$ $n \choose i$ .
+		To znamená, e $\dfrac{{\sum_{i=0}^{t} {n \choose i}}}{2^{n-k}}$ všetkıch syndrómov je dekódovate¾nıch. Pre Goppove kódy je to pribline $\dfrac{1}{t!}$.
+		Pravdepodobnos, e odtlaèok správy bude zároveò dekódovate¾nı, je teda pribline $p = \dfrac{1}{t!}$. Nato, aby sme vedeli podpísa kadú správu, budeme
+		musie ku správe prida bity navyše, a pokúsi sa podpísa túto upravenú správu. Priemernı poèet pokusov na podpísanie jednej správy je pribline $t!$.
+	\newline
+		TODO: Popis algoritmu na podpisovanie, ako vyzera vysledny podpis? Ako zvolit parametre? Aka je zlozitost?
 \subsection{Podpis s pôvodnım McEliece systémom}
 \subsection{Porovnanie}
