@@ -4,8 +4,17 @@
 		schémy pomocou postkvantového kryptosystému. Vo všeobecnosti sa na realizáciu digitálneho
 		podpisu vyuívajú asymetrické kryptosystémy, respektíve kryptosystémy s verejnım k¾úèom.
 		Kryptosystémy, ktoré sme si predstavili v predchádzajúcej èasti spåòajú toto kritérium.
-		Všeobecnı algoritmus na vytvorenie digitálneho podpisu správy môeme zapísa nasledovne
+		Všeobecná schéma na vytvorenie digitálneho podpisu správy má pod¾a definície tieto èasti
 		
+	\begin{description}
+		\item[$\bullet$] Algoritmus na generovanie páru privátnych a verejnıch k¾úèov
+		\item[$\bullet$] Podpisovı algoritmus závislı od privátneho k¾úèa, ktorı vytvorí podpis pre danú správu
+		\item[$\bullet$] Overovací algoritmus závislı od verejného k¾úèa, ktorı pre správu prijme alebo zamietne zodpovedajúci podpis		
+	\end{description}
+	
+	Niektoré kryptosystémy túto schému implementujú tak, e ako podpisovú funkciu pouijú dešifrovací algoritmus s prívatnım k¾úèom a 
+	ako overovaciu zvolia šifrovací algoritmus s verejnım k¾úèom. Podpis a overenie v tejto implementácii môe vyzera takto 
+	
 	\begin{algorithm}[h]
 		\lstset{
 			basicstyle=\small\sffamily,
@@ -22,7 +31,7 @@
 			},emphstyle={\color[rgb]{1,0,0}\bfseries}%
 			}%
 		\begin{lstlisting}
-Máme správu m, ktorú chceme podpísa a hashovaciu funkciu H
+Máme správu m, ktorú chceme podpísa a odtlaèkovú funkciu H
 Vypoèítame odtlaèok h = H(m)
 Vypoèítame podpis tak, e dešifrujeme odtlaèok h pomocou privátneho k¾úèa
 Podpísanú správu tvorí dvojica m a s
@@ -31,14 +40,18 @@ Podpísanú správu tvorí dvojica m a s
 		\label{digital-signature}
 	\end{algorithm}
 
-	Monos aplikácie tejto schémy na konkrétny kryptosystém je silne závisla od toho, ako sa
-	prekrıvajú mnoiny šifrovanıch textov a odtlaèkov. Ako si ukáeme v ïalších èastiach práce,
+	Monos tejto implmentácie je silne závisla od toho, ako sa
+	prekrıvajú mnoiny šifrovanıch textov a odtlaèkov v konkrétnom kryptosystéme. Ako si ukáeme v ïalších èastiach práce,
 	nie všetky odtlaèky musia by dešifrovate¾né správy.
 
 \subsection{Preh¾ad code-based podpisovıch schém}
 	\noindent
-		Strucny opis znamych schem. CFS,  LDGM, CFS s McEliece (?)
-		Len zhrnutie. Priadne blizsie detaily v samostatne sekcii
+		V ïalších èastiach práce sa u budeme zaobera iba code-based podpisovımi schémami, teda schémami, ktoré vyuívajú
+		code-based kryptosystémy. Ve¾kou prekákou tıchto kryptosystémov je v súèasnosti ve¾kos k¾úèa, ktorá je v porovnaní s 
+		dnešnımi kryptosystémami rádovo tisícnasobne väèšia. Pri implementácii a následne v praxi je dôleité nájs vhodnı kompromis
+		medzi poadovanou bezpeènosou a vıpoètovou a dátovou nároènosou, ktorá zavisí od vo¾by ve¾kosti k¾úèa.
+	\newline
+		Existuje nieko¾ko potenciálnych návrhov code-based kryptosystémov, z ktorıch si blišie prejdeme CFS (Courtois-Finiasz-Sendrier) a LDGM (Low-density generator matrix).
 		
 \subsection{CFS schéma}
 	\noindent 
@@ -53,6 +66,69 @@ Podpísanú správu tvorí dvojica m a s
 		Pravdepodobnos, e odtlaèok správy bude zároveò dekódovate¾nı, je teda pribline $p = \dfrac{1}{t!}$. Nato, aby sme vedeli podpísa kadú správu, budeme
 		musie ku správe prida bity navyše, a pokúsi sa podpísa túto upravenú správu. Priemernı poèet pokusov na podpísanie jednej správy je pribline $t!$.
 	\newline
-		TODO: Popis algoritmu na podpisovanie, ako vyzera vysledny podpis? Ako zvolit parametre? Aka je zlozitost?
-\subsection{Podpis s pôvodnım McEliece systémom}
+	\begin{algorithm}[h]
+		\lstset{
+			basicstyle=\small\sffamily,
+			frame=none,
+			numbers=left,
+			xleftmargin=5.0ex,
+			numberstyle=\tiny,
+			stepnumber=1,
+			showstringspaces=false,
+			keywordstyle=\color{blue}\bfseries
+			}
+		\lstset{emph={%  Adjust any special keywords
+			printf%
+			},emphstyle={\color[rgb]{1,0,0}\bfseries}%
+			}%
+		\begin{lstlisting}
+Vstup: Správa m, odtlaèková funkcia H ktorá vracia hashe dåky n-k (dåka syndrómu)
+Zvolíme i = 0, h = H(m || i)
+Pokia¾ h nie je dekódovate¾né, zvolíme i = i + 1 a opakujeme predošlı krok
+e = D(s)
+signature = (e, i)
+		\end{lstlisting}
+		\caption{Algoritmus podpisovania v CFS}
+		\label{CFS-digital-signature}
+	\end{algorithm}
+	
+	\noindent 
+		Implementácia uvedeného algoritmu môe by vylepšená po viacerıch stránkach. Prvé vylepšenie sa dá realizova pri h¾adaní dekódovate¾ného syndrómu. 
+		Na zaèiatku podpisovania si vypoèítame hash samotnej správy $h' = H(m)$ a v ïa¾ších krokoch poèítame $h = H(h' || i)$. Ïalší priestor na vylepšenie, tentokrát
+		dåka vısledného podpisu, sa ponúka v spôsobe uloenia èasti $e$ z podpisu. Autori tejto podpisovej schémy navrhli uklada $e$ ako index $I$ z mnoiny všetkıch $n$ bitovıch
+		vektorov s váhou $t$. To predstavuje èíslo z rozsahu $<1, {n \choose t}>$
+		
+	\begin{algorithm}[ht]
+		\lstset{
+			basicstyle=\small\sffamily,
+			frame=none,
+			numbers=left,
+			xleftmargin=5.0ex,
+			numberstyle=\tiny,
+			stepnumber=1,
+			showstringspaces=false,
+			keywordstyle=\color{blue}\bfseries
+			}
+		\lstset{emph={%  Adjust any special keywords
+			printf%
+			},emphstyle={\color[rgb]{1,0,0}\bfseries}%
+			}%
+		\begin{lstlisting}
+Vstup: podpis (e, i), správa m, verejnı k¾úè H', odtlaèková funkcia H ktorá vracia hashe dåky n-k (dåka syndrómu)
+
+Vypoèítame s1 = H*e^t
+Vypoèítame s2 = H(m || i)
+
+Ak s1 = s2, podpis príjimame, inak zamietame
+		\end{lstlisting}
+		\caption{Algoritmus overovania v CFS}
+		\label{CFS-digital-signature-verify}
+		
+	\noindent
+		
+	\end{algorithm}
+	
+	\subsubsection{Praktické parametre}
+	\subsubsection{CFS s pôvodnım McEliece systémom}
+\subsection{LDGM podpis}
 \subsection{Porovnanie}
