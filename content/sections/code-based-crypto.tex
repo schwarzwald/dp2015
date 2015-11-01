@@ -37,7 +37,7 @@ Ku zakódovanej správe pripoèítame náhodný chybový vektor s váhou t.
 c = c' + e,  wt(e) = t
 c tvorí zašifrovaný text  
 			\end{lstlisting}
-			\caption{Algoritmus šifrovania}
+			\caption{McEliece - Algoritmus šifrovania}
 			\label{McEliece-encrypt}
 		\end{algorithm}
 		
@@ -65,7 +65,7 @@ m = m'inv(S)
 
 m tvorí dešifrovanú správu  
 			\end{lstlisting}
-			\caption{Algoritmus dešifrovania}
+			\caption{McEliece - Algoritmus dešifrovania}
 			\label{McEliece-decrypt}
 		\end{algorithm}
 		
@@ -80,6 +80,60 @@ m tvorí dešifrovanú správu
 		$P$ je permutaèná matica s rozmermi $n \times n$ a súkromný k¾uè tvoria	matice $S$,$H$,$P$. Šifrovaný text sa vypoèíta ako syndróm slova $m'$, $c = H'm'$$^T$
 		Na dešifrovanie slova $c$ vlastník súkromného k¾úèa najskôr vynásobi slovo $c$ maticou $S^{-1}$ z¾ava, následne aplikuje dekódovací algoritmus a výsledok vynásobí
 		maticou $P^{-1}$ z¾ava. $m = P^{-1}decode(S^{-1}SHPm)$
+		
+		\begin{algorithm}[h]
+			\lstset{
+				basicstyle=\small\sffamily,
+				frame=none,
+				numbers=left,
+				xleftmargin=5.0ex,
+				numberstyle=\tiny,
+				stepnumber=1,
+				showstringspaces=false,
+				keywordstyle=\color{blue}\bfseries
+				}
+			\lstset{emph={%  Adjust any special keywords
+				printf%
+				},emphstyle={\color[rgb]{1,0,0}\bfseries}%
+			}%
+			\begin{lstlisting}
+Vstup: Správa m
+
+Vypoèítame m' = phi(m), dostaneme chybové slovo dåžky n s váhou t
+c = H'*trans(m)
+c tvorí zašifrovaný text  
+			\end{lstlisting}
+			\caption{Niederreiter - Algoritmus šifrovania}
+			\label{Niederreiter-encrypt}
+		\end{algorithm}
+		
+		\begin{algorithm}[h]
+			\lstset{
+				basicstyle=\small\sffamily,
+				frame=none,
+				numbers=left,
+				xleftmargin=5.0ex,
+				numberstyle=\tiny,
+				stepnumber=1,
+				showstringspaces=false,
+				keywordstyle=\color{blue}\bfseries
+				}
+			\lstset{emph={%  Adjust any special keywords
+				printf%
+				},emphstyle={\color[rgb]{1,0,0}\bfseries}%
+			}%
+			\begin{lstlisting}
+Vstup: Šifrovaný text c
+c' = inv(S)*c
+e' = decode(c')
+e  = inv(P)*e'
+m = invphi(e)
+
+e je pôvodné chybové slovo. Po inverznej transformácii z e dostaneme m - otvorený text
+			\end{lstlisting}
+			\caption{Niederreiter - Algoritmus dešifrovania}
+			\label{Niederreiter-decrypt}
+		\end{algorithm}
 		
 	\subsubsection{Porovnanie McEliece a Niederreiter}
 		Porovnanie velkosti sprav, klucov pripadne tabulka z CFS clanku
