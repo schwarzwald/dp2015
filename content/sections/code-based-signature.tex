@@ -34,7 +34,7 @@
 Máme správu m, ktorú chceme podpísa a odtlaèkovú funkciu H
 Vypoèítame odtlaèok h = H(m)
 Vypoèítame podpis tak, e dešifrujeme odtlaèok h pomocou privátneho k¾úèa
-Podpísanú správu tvorí dvojica m a s
+Podpísanú správu tvorí dvojica (m, s)
 		\end{lstlisting}
 		\caption{Schéma digitálneho podpisu}
 		\label{digital-signature}
@@ -116,7 +116,7 @@ signature = (e, i)
 		\begin{lstlisting}
 Vstup: podpis (e, i), správa m, verejnı k¾úè H', odtlaèková funkcia H ktorá vracia hashe dåky n-k (dåka syndrómu)
 
-Vypoèítame s1 = H*e^t
+Vypoèítame s1 = H*trans(e)
 Vypoèítame s2 = H(m || i)
 
 Ak s1 = s2, podpis príjimame, inak zamietame
@@ -133,16 +133,16 @@ Ak s1 = s2, podpis príjimame, inak zamietame
 \subsection{LDGM podpis}
 	\noindent
 		Ïalší z monıch návrhov pre code-based kryptografiu sa pokúša zmenši potrebnú ve¾kos k¾úèa pomocou vhodne zvoleného
-		kódu, respektíve pomocou vhodne zvolenej generaènej matice. LDGM (Low-density generation matrix) kódy, èie kódy s riedkou generaènou maticou
-		sa v niektorıch prípadoch dajú zapísa kompaktne pomocou cirkulantnıch matíc. Generaèná matica $G$ kódu dåky $n$ s dimenziou $k$ sa skladá
+		kódu, respektíve pomocou vhodne zvolenej generaènej matice. LDGM (Low-density generation matrix) kódy, èie kódy s riedkou generovaciou maticou
+		sa v niektorıch prípadoch dajú zapísa kompaktne pomocou cirkulantnıch matíc. Generovacia matica $G$ kódu dåky $n$ s dimenziou $k$ sa skladá
 		z $k_{0}n_{0}$ blokov s rozmermi $p\times p$, kde $n_{0}=n/p$ a $k_{0}=k/p$. 
 		
-		\begin{center} $ G = \begin{pmatrix}
+		\begin{center} $ G = \begin{bmatrix}
 						  C_{0,0} & C_{0,1} & \cdots & C_{0,n_{0}-1} \\
 						  C_{1,0} & C_{1,1} & \cdots & C_{1,n_{0}-1} \\  
 						  \vdots & \vdots & \ddots & \cdots \\  
 						  C_{k_{0}-1,0} & C_{k_{0}-1,1} & \cdots & C_{k_{0}-1,n_{0}-1} \\
-							\end{pmatrix}$
+							\end{bmatrix}$
 		\: \: \: 
 		\end{center}
 		
@@ -167,9 +167,9 @@ Ak s1 = s2, podpis príjimame, inak zamietame
 			},emphstyle={\color[rgb]{1,0,0}\bfseries}%
 			}%
 		\begin{lstlisting}
-Urèíme náhodne matice a, b s rozmermi z x r, z <= r (r = n-k)
+Urèíme náhodne matice a, b s rozmermi z x r0, z <= r0 (r0 = n0-k0)
 Vypoèítame maticu R = trans(a)*b X ones(p,p)   //ones - matica p x p same jednotky, X Kroneckerov sucin
-Urèíme maticu T poskladanú z r0*r0 cirkulantnıch matic tak, aby váha kadého riadku aj ståpca bola wt a aby rank(R+T) = r
+Urèíme maticu T poskladanú z r0*r0 cirkulantnıch matic tak, aby váha kadého riadku aj ståpca bola w_t a aby rank(R+T) = r
 Q = R + T			
 		\end{lstlisting}
 		\caption{Vıpoèet matice Q}
@@ -180,12 +180,287 @@ Q = R + T
 	\end{algorithm}
 	
 	\noindent
-		Maticu $S$ urèíme ako náhodnú maticu poskladanú z $r_0 \times r_0$ cirkulantnıch blokov ve¾kosti $p \times p$ tak, aby 
+		Maticu $S$ urèíme ako náhodnú maticu poskladanú z $n_0 \times n_0$ cirkulantnıch blokov ve¾kosti $p \times p$ tak, aby 
 		váha kadého riadku aj ståpca bola $w_s$ a aby mala plnú hodnos.
 	
 	\noindent
-		Verejnı k¾úè tvorí upravená kontrolná matica $H = Q^{-1}HS^{-1}$. Spôsob, ktorım poèítame matice $Q$ a $S$ zachovávajú QC vlastnosti pôvodnej matice $H$,
+		Verejnı k¾úè tvorí upravená kontrolná matica $H' = Q^{-1}HS^{-1}$. Spôsob, ktorım poèítame matice $Q$ a $S$ zachovávajú QC vlastnosti pôvodnej matice $H$,
 		èo nám umonuje zmenšenie ve¾kosti verejného k¾úèa.
+		
+	\noindent
+		Pri generovaní musíme rieši podobnı problém ako pri CFS schéme. Potrebujeme vıstup z hashovacej funkcie transformova na vektor, ktorı spåòa
+		podmienky urèené štruktúrou kódu. Prepokladajme, e máme funkciu $\phi$, ktorá jednoznaène priradí vektoru dåky $l$ vektor dåky $r$ s váhou $w$ a funkciu $\psi$, ktorá pre kadú správu
+		$m$ vyberie kódové slovo s nízkou váhou $w_c$ z kódu generovaného maticou $G$. 
+		Generovanie podpisu je opísane v nasledovnom algoritme.
 	  
-	  
+		\begin{algorithm}[ht]
+		\lstset{
+			basicstyle=\small\sffamily,
+			frame=none,
+			numbers=left,
+			xleftmargin=5.0ex,
+			numberstyle=\tiny,
+			stepnumber=1,
+			showstringspaces=false,
+			keywordstyle=\color{blue}\bfseries
+			}
+		\lstset{emph={%  Adjust any special keywords
+			printf%
+			},emphstyle={\color[rgb]{1,0,0}\bfseries}%
+			}%
+		\begin{lstlisting}
+Vstup: Správa m
+
+Vypoèítame hash h = H(m)
+i = 0 // |h|+|i| = l
+Vypocitame s = phi(h | i)
+Vypocitame b1 = b X ones(1,p) // X kronecker 
+Ak b1*s != 0, tak i++ a pokracujeme predoslym krokom.
+
+Vypocitame s' = Q*s
+Urcime e = [0k | trans(s')] // 0k - nulovy vektor dlzky k
+Vyberieme kodove slovo c = psi(m)
+Vypocitame e' = (e + c)*trans(S)
+
+Podpis tvori dvojica (e', i)
+		\end{lstlisting}
+		\caption{Podpis v LDGM}
+		\label{signature-LDGM}
+		
+	\noindent
+		
+	\end{algorithm}
+	
+	\noindent
+		Overenie podpisu je rıchle a prebieha takto.
+		
+	\begin{algorithm}[ht]
+		\lstset{
+			basicstyle=\small\sffamily,
+			frame=none,
+			numbers=left,
+			xleftmargin=5.0ex,
+			numberstyle=\tiny,
+			stepnumber=1,
+			showstringspaces=false,
+			keywordstyle=\color{blue}\bfseries
+			}
+		\lstset{emph={%  Adjust any special keywords
+			printf%
+			},emphstyle={\color[rgb]{1,0,0}\bfseries}%
+			}%
+		\begin{lstlisting}
+Vstup: Správa m, podpis (e', i)
+
+Ak neplati wt(e') <= (w_t*w + w_c)*w_s podpis zamietneme
+inak vypocitame s = phi(H(m) | i)   wt(s) = w
+	Ak wt(s) != w podpis zamietneme, 
+	inak pocitame s1 = H'*trans(e')
+		Ak s != s1 podpis zamietame
+		inak akceptujeme
+
+		\end{lstlisting}
+		\caption{Overenie v LDGM}
+		\label{verify-LDGM}
+		
+	\noindent
+		
+	\end{algorithm}
+	\subsubsection{Ukákovı príklad}
+		\noindent
+			Pre lepšiu predstavu ako LDGM podpisová schéma funguje si predvedieme generovanie, podpisovanie a overenie na
+			príklade. Hodnoty parametrov pouité v príklade sú odlišné od hodnôt vhodnıch pre praktické vyuitie.
+		
+		\paragraph{Generovanie k¾úèov}
+			\noindent
+				Majme kód $C(15, 9)$ s kontrolnou maticou $H$ v systematickom tvare
+			
+				\setcounter{MaxMatrixCols}{20}
+				\begin{center} $ H = 
+					\begin{bmatrix}
+							1 & 0 & 0 & 0 & 0 & 1 & 0 & 1 & 0 & 1 & 0 & 0 & 0 & 0 & 0 \\
+							0 & 1 & 0 & 1 & 0 & 0 & 0 & 0 & 1 & 0 & 1 & 0 & 0 & 0 & 0 \\
+							0 & 0 & 1 & 0 & 1 & 0 & 1 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 \\
+							0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 1 & 0 & 0 \\
+							0 & 0 & 0 & 0 & 0 & 1 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 \\
+							0 & 0 & 0 & 1 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 1 \\
+					\end{bmatrix}
+					$
+					\: \: \: 
+				\end{center}
+				
+				Rozmer cirkulantnıch matíc je $p \times p$, $p = 3$, $n_0 = 5$, $r_0 = 2$.
+			\newline
+				Ïalej vypoèítame maticu $Q$. Matica Q je tvorená ako súèet matíc $R$ a $T$. Na vıpoèet matice R zvolíme matice $a$, $b$ s rozmermi $z \times r_0$, kde $z \leq r_0$.
+				
+				\begin{center} $ a = \begin{bmatrix}
+							1 & 0 \\
+					\end{bmatrix}$
+					\: \: \: 
+				\end{center}
+				
+				\begin{center} $ b = \begin{bmatrix}
+							0 & 1 \\
+					\end{bmatrix}$
+					\: \: \: 
+				\end{center}
+			
+			\noindent 
+				Matica $R = (a'\times b) \otimes 1_{p,p}$ 	
+			
+			\begin{center} $ R = \begin{bmatrix}
+							0 & 0 & 0 & 1 & 1 & 1 \\
+							0 & 0 & 0 & 1 & 1 & 1 \\
+							0 & 0 & 0 & 1 & 1 & 1 \\
+							0 & 0 & 0 & 0 & 0 & 0 \\
+							0 & 0 & 0 & 0 & 0 & 0 \\
+							0 & 0 & 0 & 0 & 0 & 0 \\
+				\end{bmatrix}$
+				\: \: \: 
+			\end{center}
+			
+			\noindent 
+				Maticu $T$ vyberáme tak, aby sa skladala z $r_0 \times r_0$ cirkulatnıch blokov, váha kadého ståpca a riadku bola $w_t$ a hodnos $R+T$ bola $r = r_{0}p$.
+				Zvolme $w_t = 1$.
+			\begin{center} $ T = \begin{bmatrix}
+							1 & 0 & 0 & 0 & 0 & 0 \\
+							0 & 1 & 0 & 0 & 0 & 0 \\
+							0 & 0 & 1 & 0 & 0 & 0 \\
+							0 & 0 & 0 & 0 & 0 & 1 \\
+							0 & 0 & 0 & 1 & 0 & 0 \\
+							0 & 0 & 0 & 0 & 1 & 0 \\
+				\end{bmatrix}$
+				\: \: \: 
+			\end{center}
+			
+			\begin{center} $ Q = \begin{bmatrix}
+							1 & 0 & 0 & 1 & 1 & 1 \\
+							0 & 1 & 0 & 1 & 1 & 1 \\
+							0 & 0 & 1 & 1 & 1 & 1 \\
+							0 & 0 & 0 & 0 & 0 & 1 \\
+							0 & 0 & 0 & 1 & 0 & 0 \\
+							0 & 0 & 0 & 0 & 1 & 0 \\
+				\end{bmatrix}$
+				\: \: \: 
+			\end{center}
+			
+			\noindent
+				Matica $S$ je regulárna matica tvorená z $n_0 \times n_0$ cirkulatnıch blokov, kadı ståpec a riadok má hodnos $w_s$. Nech $w_s = 1$, potom matica $S$ môe vyzera nasledovne
+			
+			\setcounter{MaxMatrixCols}{20}
+			\begin{center} $ S = 
+				\begin{bmatrix}
+							0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+							0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+							0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+							0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+							0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+							1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+							0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 \\
+							0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 \\
+							0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 \\
+							0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 \\
+							0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 \\
+							0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 \\
+							0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+							0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 \\
+							0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+				\end{bmatrix}
+				$
+				\: \: \: 
+			\end{center}
+			
+			\noindent
+				Keï máme matice $Q$ a $S$, môeme vypoèíta maticu $H' = Q^{-1}HS^{-1}$ , ktorá tvorí verejnı k¾úè
+			\setcounter{MaxMatrixCols}{20}
+			\begin{center}  $H' = 
+				\begin{bmatrix}
+							0 & 1 & 1 & 0 & 0 & 1 & 1 & 0 & 0 & 1 & 1 & 1 & 0 & 1 & 1 \\
+							1 & 0 & 1 & 1 & 0 & 0 & 0 & 1 & 0 & 1 & 1 & 1 & 1 & 0 & 1 \\
+							1 & 1 & 0 & 0 & 1 & 0 & 0 & 0 & 1 & 1 & 1 & 1 & 1 & 1 & 0 \\
+							1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 1 \\
+							0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 1 & 0 & 0 \\
+							0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 1 & 0 \\
+				\end{bmatrix}
+				$
+				\: \: \: 
+			\end{center}
+		
+		\paragraph{Vytvorenie podpisu}
+			\noindent 
+				Predpokladajme, e máme správu $m$, pre ktorú je vıstup z funkcie $\phi$ vektor s váhou $w$ 
+			
+			\begin{center}  $s = 
+				\begin{bmatrix}
+							0 & 0 & 0 & 1 & 0 & 1 \\
+				\end{bmatrix}
+				$\textsuperscript{T}
+				\: \: \: $w = 2 $
+			\end{center}
+			
+			\noindent
+				Ïalej vypoèítame $s' = Q \cdot s$
+			
+			\begin{center}  $s' = 
+				\begin{bmatrix}
+							0 & 0 & 0 & 1 & 1 & 0 \\
+				\end{bmatrix}
+				$\textsuperscript{T}
+				\: \: \: 
+			\end{center}
+			
+			\noindent
+				Pre vektor $s'$ urèíme chybové slovo v tvare $e = [0_{1\times k}, s'\textsuperscript{T}]$
+			
+			\begin{center}  $e = 
+				\begin{bmatrix}
+							0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 1 & 1 & 0 \\
+				\end{bmatrix}
+				$
+				\: \: \: 
+			\end{center}
+			
+			\noindent
+				Predstavme si, e funkcia $\psi(m)$ vyberie kódové slovo $c$ s váhou $w_c = 4$ pre správu $m$
+			
+			\begin{center}  $c = 
+				\begin{bmatrix}
+							 1 & 1 & 0 & 1 & 0 & 0 & 0 & 1 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+				\end{bmatrix}
+				$
+				\: \: \: 
+			\end{center}
+			
+			\noindent
+				Poslednı krok podpisu je vıpoèet $e' = (e + c)\cdot S\textsuperscript{T}$
+			
+			\begin{center}  $e' = 
+				\begin{bmatrix}
+							 0 & 1 & 0 & 1 & 0 & 1 & 0 & 0 & 0 & 1 & 1 & 0 & 1 & 0 & 0 \\
+				\end{bmatrix}
+				$
+				\: \: \: 
+			\end{center}
+			
+			\noindent
+				Podpis tvorí dvojica $(e', i)$. V tomto príklade však $i$ neuvádzame. 
+			
+		\paragraph{Overenie podpisu}
+			\noindent
+				Ako prvé overíme, èi $wt(e') \leq (w_t\cdot{w} + w_c)\cdot w_s$. V našom príklade $w_t = 1$, $w = 2$, $w_c = 4$ a $w_s = 1$.
+				Potom $6 \leq (1\cdot 2 + 4)\cdot 1$, $6 \leq 6$
+				Prvá podmienka je splnená. Ïalej pomocou verejného k¾úèa zrekonštruujeme odtlaèok správy $s_0 = H'\cdot e'\textsuperscript{T}$
+			
+			\begin{center}  $s_0 = 
+				\begin{bmatrix}
+							 0 & 0 & 0 & 1 & 0 & 1 \\
+				\end{bmatrix}
+				$\textsuperscript{T}
+				\: \: \: 
+			\end{center}
+			
+			\noindent
+				Vidíme, e $s = s_0$ a podpis teda akceptujeme.		
+
+			
 \subsection{Porovnanie}
