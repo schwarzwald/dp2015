@@ -16,28 +16,14 @@
 	ako overovaciu zvolia šifrovací algoritmus s verejnım k¾úèom. Podpis a overenie v tejto implementácii môe vyzera takto 
 	
 	\begin{algorithm}[h]
-		\lstset{
-			basicstyle=\small\sffamily,
-			frame=none,
-			numbers=left,
-			xleftmargin=5.0ex,
-			numberstyle=\tiny,
-			stepnumber=1,
-			showstringspaces=false,
-			keywordstyle=\color{blue}\bfseries
-			}
-		\lstset{emph={%  Adjust any special keywords
-			printf%
-			},emphstyle={\color[rgb]{1,0,0}\bfseries}%
-			}%
-		\begin{lstlisting}
-Máme správu m, ktorú chceme podpísa a odtlaèkovú funkciu H
-Vypoèítame odtlaèok h = H(m)
-Vypoèítame podpis tak, e dešifrujeme odtlaèok h pomocou privátneho k¾úèa
-Podpísanú správu tvorí dvojica (m, s)
-		\end{lstlisting}
 		\caption{Schéma digitálneho podpisu}
 		\label{digital-signature}
+		\begin{algorithmic}
+			\State Máme správu $m$, ktorú chceme podpísa a odtlaèkovú funkciu $H$
+			\State Vypoèítame odtlaèok $h = H(m)$
+			\State Vypoèítame podpis tak, e dešifrujeme odtlaèok $h$ pomocou privátneho k¾úèa
+			\State Podpísanú správu tvorí dvojica $(m, s)$
+		\end{algorithmic}
 	\end{algorithm}
 
 	Monos tejto implmentácie je silne závisla od toho, ako sa
@@ -67,29 +53,23 @@ Podpísanú správu tvorí dvojica (m, s)
 		musie ku správe prida bity navyše, a pokúsi sa podpísa túto upravenú správu. Priemernı poèet pokusov na podpísanie jednej správy je pribline $t!$.
 	\newline
 	\begin{algorithm}[h]
-		\lstset{
-			basicstyle=\small\sffamily,
-			frame=none,
-			numbers=left,
-			xleftmargin=5.0ex,
-			numberstyle=\tiny,
-			stepnumber=1,
-			showstringspaces=false,
-			keywordstyle=\color{blue}\bfseries
-			}
-		\lstset{emph={%  Adjust any special keywords
-			printf%
-			},emphstyle={\color[rgb]{1,0,0}\bfseries}%
-			}%
-		\begin{lstlisting}
-Vstup: Správa m, odtlaèková funkcia H ktorá vracia hashe dåky n-k (dåka syndrómu)
-Zvolíme i = 0, h = H(m || i)
-Pokia¾ h nie je dekódovate¾né, zvolíme i = i + 1 a opakujeme predošlı krok
-e = D(s)
-signature = (e, i)
-		\end{lstlisting}
 		\caption{Algoritmus podpisovania v CFS}
 		\label{CFS-digital-signature}
+		\begin{algorithmic}
+			\INPUT Správa $m$, odtlaèková funkcia $H$ ktorá vracia odtlaèky dåky $n-k$
+			\OUTPUT Podpis správy $m$, ozn. $sig$
+			\State $i \gets 0$
+			\Repeat
+				\State $h \gets H(m || i)$
+				\If{h nie je dekódovate¾né slovo}
+					\State $i \gets i+1$
+				\EndIf
+			\Until{$h$ je dekódovate¾né slovo}
+
+			\State $e \gets Decode(h)$
+			\State $sig \gets (e, i)$
+			\State \Return $sig$
+		\end{algorithmic}	
 	\end{algorithm}
 	
 	\noindent 
@@ -99,32 +79,16 @@ signature = (e, i)
 		vektorov s váhou $t$. To predstavuje èíslo z rozsahu $<1, {n \choose t}>$
 		
 	\begin{algorithm}[ht]
-		\lstset{
-			basicstyle=\small\sffamily,
-			frame=none,
-			numbers=left,
-			xleftmargin=5.0ex,
-			numberstyle=\tiny,
-			stepnumber=1,
-			showstringspaces=false,
-			keywordstyle=\color{blue}\bfseries
-			}
-		\lstset{emph={%  Adjust any special keywords
-			printf%
-			},emphstyle={\color[rgb]{1,0,0}\bfseries}%
-			}%
-		\begin{lstlisting}
-Vstup: podpis (e, i), správa m, verejnı k¾úè H', odtlaèková funkcia H ktorá vracia hashe dåky n-k (dåka syndrómu)
-
-Vypoèítame s1 = H*trans(e)
-Vypoèítame s2 = H(m || i)
-
-Ak s1 = s2, podpis príjimame, inak zamietame
-		\end{lstlisting}
 		\caption{Algoritmus overovania v CFS}
 		\label{CFS-digital-signature-verify}
-		
-	\noindent
+		\begin{algorithmic}
+			\INPUT Podpis $(e, i)$, správa $m$, verejnı k¾úè $H'$, odtlaèková funkcia $H$ ktorá vracia odtlaèky dåky $n-k$
+			\OUTPUT True/False - podpis prijímame/zamietame
+			\State $s_1 \gets H'e^{T}$
+			\State $s_2 \gets H(m || i)$
+
+			\State \Return $s_1 = s_2$
+		\end{algorithmic}
 		
 	\end{algorithm}
 	
@@ -152,31 +116,16 @@ Ak s1 = s2, podpis príjimame, inak zamietame
 		Postup ako urèi maticu $Q$ je zhrnutı v nasledovnom algoritme.
 		
 	\begin{algorithm}[ht]
-		\lstset{
-			basicstyle=\small\sffamily,
-			frame=none,
-			numbers=left,
-			xleftmargin=5.0ex,
-			numberstyle=\tiny,
-			stepnumber=1,
-			showstringspaces=false,
-			keywordstyle=\color{blue}\bfseries
-			}
-		\lstset{emph={%  Adjust any special keywords
-			printf%
-			},emphstyle={\color[rgb]{1,0,0}\bfseries}%
-			}%
-		\begin{lstlisting}
-Urèíme náhodne matice a, b s rozmermi z x r0, z <= r0 (r0 = n0-k0)
-Vypoèítame maticu R = trans(a)*b X ones(p,p)   //ones - matica p x p same jednotky, X Kroneckerov sucin
-Urèíme maticu T poskladanú z r0*r0 cirkulantnıch matic tak, aby váha kadého riadku aj ståpca bola w_t a aby rank(R+T) = r
-Q = R + T			
-		\end{lstlisting}
 		\caption{Vıpoèet matice Q}
 		\label{matrix-Q}
-		
-	\noindent
-		
+		\begin{algorithmic}
+			\State Urèíme náhodne matice $a$, $b$ s rozmermi $z \times r_0$, $z \leq r_0$ 
+			\State Vypoèítame maticu $R \gets a^{T}b \otimes 1_{p,p}$   
+			\State Urèíme maticu $T$ poskladanú z $r_0 \times r_0$ cirkulantnıch matic tak, aby váha kadého riadku aj ståpca bola $w_t$ a aby $rank(R+T) = r$
+			\State $Q \gets R + T$		
+			\State
+			\State \it{Pozn. $r_0 = n_0-k_0$, $1_{p,p}$ - matica $p \times p$ samé jednotky, $\otimes$ - Kroneckerov súèin}
+		\end{algorithmic}		
 	\end{algorithm}
 	
 	\noindent
@@ -194,74 +143,58 @@ Q = R + T
 		Generovanie podpisu je opísane v nasledovnom algoritme.
 	  
 		\begin{algorithm}[ht]
-		\lstset{
-			basicstyle=\small\sffamily,
-			frame=none,
-			numbers=left,
-			xleftmargin=5.0ex,
-			numberstyle=\tiny,
-			stepnumber=1,
-			showstringspaces=false,
-			keywordstyle=\color{blue}\bfseries
-			}
-		\lstset{emph={%  Adjust any special keywords
-			printf%
-			},emphstyle={\color[rgb]{1,0,0}\bfseries}%
-			}%
-		\begin{lstlisting}
-Vstup: Správa m
+			\caption{Podpis v LDGM}
+			\label{signature-LDGM}
+			\begin{algorithmic}
+				\INPUT Správa $m$
+				\OUTPUT Podpis správy $m$, ozn. $sig$
+				\State Vypoèítame odtlaèok správy $m$
+				\State $h \gets H(m)$
+				\State $i \gets 0$ , $|h|+|i| = l$
+				\Repeat
+					\State $s \gets \phi(h || i)$
+					\State $b_1 \gets b \otimes 1_{1,p}$
+					\If{$b_1s \neq 0$}
+						\State $i \gets i + 1$
+					\EndIf
+				\Until{$b_1s = 0$}
 
-Vypoèítame hash h = H(m)
-i = 0 // |h|+|i| = l
-Vypocitame s = phi(h | i)
-Vypocitame b1 = b X ones(1,p) // X kronecker 
-Ak b1*s != 0, tak i++ a pokracujeme predoslym krokom.
+				\State $s' \gets Qs$
+				\State $e \gets [0_{1,k} || {s'}\textsuperscript{T}]$ 
+				\State $c \gets \psi(m)$
+				\State $e' \gets (e + c)S^{T}$
 
-Vypocitame s' = Q*s
-Urcime e = [0k | trans(s')] // 0k - nulovy vektor dlzky k
-Vyberieme kodove slovo c = psi(m)
-Vypocitame e' = (e + c)*trans(S)
-
-Podpis tvori dvojica (e', i)
-		\end{lstlisting}
-		\caption{Podpis v LDGM}
-		\label{signature-LDGM}
-		
-	\noindent
-		
+				\State $sig \gets (e', i)$
+				\State \Return sig
+				
+				\State
+				\State \textit{Pozn. $0_{1, k}$ - nulovı vektor dåky $k$}
+		\end{algorithmic}
 	\end{algorithm}
 	
 	\noindent
 		Overenie podpisu je rıchle a prebieha takto.
 		
 	\begin{algorithm}[ht]
-		\lstset{
-			basicstyle=\small\sffamily,
-			frame=none,
-			numbers=left,
-			xleftmargin=5.0ex,
-			numberstyle=\tiny,
-			stepnumber=1,
-			showstringspaces=false,
-			keywordstyle=\color{blue}\bfseries
-			}
-		\lstset{emph={%  Adjust any special keywords
-			printf%
-			},emphstyle={\color[rgb]{1,0,0}\bfseries}%
-			}%
-		\begin{lstlisting}
-Vstup: Správa m, podpis (e', i)
-
-Ak neplati wt(e') <= (w_t*w + w_c)*w_s podpis zamietneme
-inak vypocitame s = phi(H(m) | i)   wt(s) = w
-	Ak wt(s) != w podpis zamietneme, 
-	inak pocitame s1 = H'*trans(e')
-		Ak s != s1 podpis zamietame
-		inak akceptujeme
-
-		\end{lstlisting}
 		\caption{Overenie v LDGM}
 		\label{verify-LDGM}
+		\begin{algorithmic}
+			\INPUT Správa $m$, podpis $(e', i)$
+			\OUTPUT True/False - podpis prijímame/zamietame
+			
+			\If{$wt(e') \leq (w_tw + w_c)w_s$}
+				\State \Return False
+			\Else
+				\State $s \gets \phi(H(m) || i)$,   $wt(s) = w$
+				\If{$wt(s) \neq w$}
+					\State \Return False
+				\Else
+					\State $s_1 \gets H'e'\textsuperscript{T}$
+					\State \Return $s = s_1$
+				\EndIf
+			\EndIf
+		\end{algorithmic}
+		
 		
 	\noindent
 		
@@ -410,7 +343,7 @@ inak vypocitame s = phi(H(m) | i)   wt(s) = w
 			\end{center}
 			
 			\noindent
-				Pre vektor $s'$ urèíme chybové slovo v tvare $e = [0_{1\times k}, s'\textsuperscript{T}]$
+				Vektoru $s'$ zodpovedá chybové slovo v tvare $e = [0_{1\times k}, s'\textsuperscript{T}]$
 			
 			\begin{center}  $e = 
 				\begin{bmatrix}

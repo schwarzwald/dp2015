@@ -16,57 +16,30 @@
 		$n \times n$. Verejnı k¾úè tvorí matica $G' = SGP$ a parameter $t$. Súkromnı k¾uè tvoria matice $S$, $G$, $P$.
 		
 		\begin{algorithm}[h]
-			\lstset{
-				basicstyle=\small\sffamily,
-				frame=none,
-				numbers=left,
-				xleftmargin=5.0ex,
-				numberstyle=\tiny,
-				stepnumber=1,
-				showstringspaces=false,
-				keywordstyle=\color{blue}\bfseries
-				}
-			\lstset{emph={%  Adjust any special keywords
-				printf%
-				},emphstyle={\color[rgb]{1,0,0}\bfseries}%
-			}%
-			\begin{lstlisting}
-Správu m dåky k vynásobíme s verejnou maticou G'.
-c' = mG'
-Ku zakódovanej správe pripoèítame náhodnı chybovı vektor s váhou t.
-c = c' + e,  wt(e) = t
-c tvorí zašifrovanı text  
-			\end{lstlisting}
 			\caption{McEliece - Algoritmus šifrovania}
 			\label{McEliece-encrypt}
+			\begin{algorithmic}
+				\INPUT Správa $m$ dåky $k$
+				\OUTPUT Zašifrovaná správa c
+				\State $c' \leftarrow mG'$
+				\State Ku zakódovanej správe pripoèítame náhodnı chybovı vektor s váhou $t$.
+				\State $c \leftarrow c' + e$,  $wt(e) = t$
+				\State \Return $c$
+			\end{algorithmic}		
 		\end{algorithm}
 		
 		\begin{algorithm}[h]
-			\lstset{
-				basicstyle=\small\sffamily,
-				frame=none,
-				numbers=left,
-				xleftmargin=5.0ex,
-				numberstyle=\tiny,
-				stepnumber=1,
-				showstringspaces=false,
-				keywordstyle=\color{blue}\bfseries
-				}
-			\lstset{emph={%  Adjust any special keywords
-				printf%
-				},emphstyle={\color[rgb]{1,0,0}\bfseries}%
-			}%
-			\begin{lstlisting}
-Správu c vynásobíme s inv(P)
-
-c = mG'inv(P) = mSG + e*inv(P)
-m' = decode(mSG + e*inv(P)) = mS;
-m = m'inv(S)
-
-m tvorí dešifrovanú správu  
-			\end{lstlisting}
 			\caption{McEliece - Algoritmus dešifrovania}
 			\label{McEliece-decrypt}
+			\begin{algorithmic}
+				\INPUT Zašifrovaná správa $c$
+				\OUTPUT Otvorená správa m
+				\State Správu $c$ vynásobíme s $P^{-1}$
+				\State $c' \leftarrow cP^{-1} = mSG + eP^{-1}$
+				\State $m' \leftarrow Decode(c') = mS$;
+				\State $m \leftarrow m'S^{-1}$
+				\State \Return $m$
+			\end{algorithmic}			
 		\end{algorithm}
 		
 	\noindent
@@ -82,60 +55,49 @@ m tvorí dešifrovanú správu
 		maticou $P^{-1}$ z¾ava. $m = P^{-1}decode(S^{-1}SHPm)$
 		
 		\begin{algorithm}[h]
-			\lstset{
-				basicstyle=\small\sffamily,
-				frame=none,
-				numbers=left,
-				xleftmargin=5.0ex,
-				numberstyle=\tiny,
-				stepnumber=1,
-				showstringspaces=false,
-				keywordstyle=\color{blue}\bfseries
-				}
-			\lstset{emph={%  Adjust any special keywords
-				printf%
-				},emphstyle={\color[rgb]{1,0,0}\bfseries}%
-			}%
-			\begin{lstlisting}
-Vstup: Správa m
-
-Vypoèítame m' = phi(m), dostaneme chybové slovo dåky n s váhou t
-c = H'*trans(m)
-c tvorí zašifrovanı text  
-			\end{lstlisting}
 			\caption{Niederreiter - Algoritmus šifrovania}
 			\label{Niederreiter-encrypt}
+			\begin{algorithmic}
+				\INPUT Správa $m$
+				\OUTPUT Zašifrovaná správa $c$
+				\State $m' \leftarrow \phi(m)$, dostaneme chybové slovo dåky $n$ s váhou $t$
+				\State $c \leftarrow H'm^{T}$
+				\State \Return $c$
+			\end{algorithmic}
 		\end{algorithm}
-		
-		\begin{algorithm}[h]
-			\lstset{
-				basicstyle=\small\sffamily,
-				frame=none,
-				numbers=left,
-				xleftmargin=5.0ex,
-				numberstyle=\tiny,
-				stepnumber=1,
-				showstringspaces=false,
-				keywordstyle=\color{blue}\bfseries
-				}
-			\lstset{emph={%  Adjust any special keywords
-				printf%
-				},emphstyle={\color[rgb]{1,0,0}\bfseries}%
-			}%
-			\begin{lstlisting}
-Vstup: Šifrovanı text c
-c' = inv(S)*c
-e' = decode(c')
-e  = inv(P)*e'
-m = invphi(e)
 
-e je pôvodné chybové slovo. Po inverznej transformácii z e dostaneme m - otvorenı text
-			\end{lstlisting}
-			\caption{Niederreiter - Algoritmus dešifrovania}
-			\label{Niederreiter-decrypt}
-		\end{algorithm}
+	\begin{algorithm}	
+		\caption{Niederreiter - Algoritmus dešifrovania}
+		\label{Niederreiter-decrypt}
+		\begin{algorithmic}
+			\INPUT Vektor $c$, ktorı predstavuje šifrovanú správu $m$  
+			\OUTPUT Dešifrovaná správa, pôvodné $m$
+			\State $c' \leftarrow S^{-1}c$
+			\State $e' \leftarrow Decode(c')$
+			\State $e \leftarrow P^{-1}e'$
+			\State $m \leftarrow \phi^{-1}(e)$
+		\end{algorithmic}
+	\end{algorithm}
 		
 	\subsubsection{Porovnanie McEliece a Niederreiter}
-		Porovnanie velkosti sprav, klucov pripadne tabulka z CFS clanku
+		\noindent 
+			Zhròme si a porovnajme parametre oboch kryptosystémov a ako sa zvolené parametre kódu prejavia na ve¾kosti správ a k¾úèov.
+		
+		\setcounter{MaxMatrixCols}{20}
+		\begin{table}[h]
+		\centering
+		\caption{Porovnanie parametrov McEliece a Niederreiter}
+		\label{Porovnanie parametrov McEliece a Niederreiter}
+			\begin{tabular}{l|l|l}
+											   & \textbf{McEliece}   & \textbf{Niederreiter} \\ \hline
+			\textbf{Verejnı k¾úè}              & $G'$, $t$               & $H'$, $t$                 \\ \hline
+			\textbf{Privátny k¾úè}             & $S$, $G$, $P$             & $S$, $H$, $P$              \\ \hline
+			\textbf{Ve¾kos VK}                & $k \times n$               & $n-k \times n$               \\ \hline
+			\textbf{Ve¾kos PK}                & $k \times k$, $k \times n$, $n \times n$ & $k \times k$, $n-k \times n$, $n \times n$ \\ \hline
+			\textbf{Ve¾kos otvorenej správy}  & $k$                   & $n$                     \\ \hline
+			\textbf{Ve¾kos šifrovanej správy} & $n$                   & $n-k$                   \\ \hline
+			\textbf{Poèet monıch správ}       & $2^k$ & $\sum_{i=0}^{t}$ $n \choose i$       
+			\end{tabular}
+		\end{table}
 		
 	

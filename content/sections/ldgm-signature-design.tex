@@ -1,0 +1,35 @@
+\subsection{Návrh implementácie pre LDGM}
+	\noindent
+		V tejto èasti navrhneme implementáciu LDGM podpisovej schémy a predstavíme konkrétne algoritmy
+		na generovanie k¾úèov, podpisov a overovacie funkcie. 
+	\subsubsection{Volite¾né parametre}
+		\noindent
+			Zhròme si najskôr všetky volite¾né parametre a funkcie pre celú podpisovú schému LDGM
+			
+			\begin{table}[h]
+			\centering
+			\caption{Parametre a funkcie LDGM}
+			\label{Parametre a funkcie LDGM}
+				\begin{tabular}{ll}
+				\textbf{Parameter} & \textbf{Popis}                                                      \\
+				$n$                  & dåka kódu ($n_0p$)                                                    \\
+				$k$                  & dimenzia kódu ($k_0p$)                                                 \\
+				$t $                 & poèet opravite¾nıch chıb                                            \\
+				$p$                  & ve¾kos cirkulantnıch matíc                                         \\
+				$z$                  & poèet riadkov matice $a$,$b$ ($z - (n-k)$)                          \\
+				$w_t$               & váha riadku/ståpca matice $T$                                         \\
+				$w_s$               & váha riadku/ståpca matice $S$                                         \\
+				$w_c$              & váha slova $c$, ktoré urèuje funkcia $\psi$                              \\
+				$\psi$                & funkcia, ktorá jednoznaène priradí správe $m$ kódové slovo $c$          \\
+				$\phi$                & funkcia, ktorá zobrazuje slová dåky $x$ na vektory dåky $y$ s váhou $z$
+				\end{tabular}
+			\end{table}
+	\subsubsection{Funkcia $\phi$}
+		\noindent
+			Prvou dôleitou súèasou pre celú implementáciu, je zvoli funkciu $\phi$, ktorá jednoznaène mapuje vektor dåky $n$ 
+			na vektor dåky $l$ s váhou $t$. 
+			
+	\subsubsection{Funkcia $\psi$}
+	
+	\subsubsection{Generovanie matice Q}
+	
