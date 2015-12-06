@@ -16,7 +16,7 @@
 				$k$                  & dimenzia kódu ($k_0p$)                                                 \\
 				$t $                 & poèet opravite¾nıch chıb                                            \\
 				$p$                  & ve¾kos cirkulantnıch matíc                                         \\
-				$z$                  & poèet riadkov matice $a$,$b$ ($z - (n-k)$)                          \\
+				$z$                  & poèet riadkov matice $a$,$b$  pozn. ($z \leq (n-k)$)                          \\
 				$w_t$               & váha riadku/ståpca matice $T$                                         \\
 				$w_s$               & váha riadku/ståpca matice $S$                                         \\
 				$w_c$              & váha slova $c$, ktoré urèuje funkcia $\psi$                              \\
@@ -27,9 +27,54 @@
 	\subsubsection{Funkcia $\phi$}
 		\noindent
 			Prvou dôleitou súèasou pre celú implementáciu, je zvoli funkciu $\phi$, ktorá jednoznaène mapuje vektor dåky $n$ 
-			na vektor dåky $l$ s váhou $t$. 
+			na vektor dåky $l$ s váhou $t$ a má inverziu. Pre tento úèel zvolíme algoritmus, ktorı navrhol Sendrier v [xx], ktorı
+			má lineárnu zloitos. Implementácia (mierne upravená pre naše potreby) a jej inverzia vyzerá nasledovne.
+			
+			\begin{algorithm}[h]
+				\caption{Funkcia $\phi$}
+				\label{phi-function}
+				\begin{algorithmic}
+					\INPUT Vektor dåky $n$, parameter $t$
+					\OUTPUT Vektor dåky $l$ s váhou $t$
+
+				\end{algorithmic}
+			\end{algorithm}
+			
+			\begin{algorithm}[h]
+				\caption{Funkcia $\phi^{-1}$}
+				\label{phi-inv-function}
+				\begin{algorithmic}
+					\INPUT Vektor dåky $l$, parameter $n$, parameter $t$
+					\OUTPUT Vektor dåky $n$
+
+				\end{algorithmic}
+			\end{algorithm}
 			
 	\subsubsection{Funkcia $\psi$}
 	
 	\subsubsection{Generovanie matice Q}
+		\noindent
+			Ako bolo uvedené v predošlej èasti, matica $Q$ sa skladá z matíc $R$ a $T$, ktoré su blokovo cirkulantné. 
+			Matica $R$ vznikne ako produkt $a^{T}b \otimes 1_{p,p}$, matice $a$, $b$ náhodne vygenerujeme v závislosti od parametra $z$.
+			Matica $T$ sa skladá z cirkulantnıch matíc s rozmerom $p \times p$. A váha kadého riadku a ståpca je $w_t$, nepárne.
+			Uvedieme si algoritmus na generovanie matice $T$.
+			\begin{algorithm}[h]
+				\caption{Generovanie  regulárnej matice z cirkulantnıch blokov}
+				\label{gen-mat-reg}
+				\begin{algorithmic}
+					\INPUT Poèet cirkulantnıch blokov - $r_0$, ve¾kos bloku - $p$, predpísaná váha $w_t$
+					\OUTPUT Regulárna matica z cirkulatnıch blokov s predpísanou váhou riadkov a ståpcov
+					
+					\State Vytvorime riadok z blokov tak, aby prvy blok bol jednotkova matica, zvysok su bloky
+							s parnou vahou
+					\State Ostatne riadky vytvorime posuvanim blokov z prveho "riadku" 
+					\State Dostaneme na diagonale jednotkove matice, zvysok matice s parnym poctom jednotiek
+					\State Premiesame blokovo riadky a stlpce
+				\end{algorithmic}
+			\end{algorithm}
+			
+			Ak súèet R+T nie je regulárna matica, skúsime vygenerova T znova.
+			
+			
+			
 	

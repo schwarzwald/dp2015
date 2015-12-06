@@ -169,8 +169,8 @@
 				
 				\State
 				\State \textit{Pozn. $0_{1, k}$ - nulovı vektor dåky $k$}
-		\end{algorithmic}
-	\end{algorithm}
+			\end{algorithmic}
+		\end{algorithm}
 	
 	\noindent
 		Overenie podpisu je rıchle a prebieha takto.
@@ -397,3 +397,20 @@
 
 			
 \subsection{Porovnanie}
+	\noindent
+		Pozrime sa na porovnanie CFS a LDGM schémy. 
+	\begin{table}[h]
+		\centering
+		\caption{Porovnanie CFS a LDGM schémy}
+		\label{cfs-x-ldgm}
+		\begin{tabular}{l|l|l}
+										  & \textbf{CFS}                & \textbf{LDGM}                                                 \\ \hline
+		\textbf{Velkos VK}  & $n - k \times n$                   & \multicolumn{1}{l}{$(n - k \times n) / p$}                          \\ \hline
+		\textbf{Ve¾kos PK} & $n-k \times n-k, n-k \times n, n \times n$ & \multicolumn{1}{l}{$(n-k \times n, n-k \times n -k, n \times n)/p$} \\ \hline
+		\textbf{Ve¾kos podpisu}          & $n$                           & $n$                                                            
+		\end{tabular}
+	\end{table}
+	
+	\noindent
+		Vidíme, e pri rovnakıch parametroch kódu LDGM schéma ponúka p-násobnú úsporu pamäte. Treba však podotknú, e kódy pouité v kadej 
+		schéme sa líšia a z praktického h¾adiska sa volia iné hodnoty parametrov.
