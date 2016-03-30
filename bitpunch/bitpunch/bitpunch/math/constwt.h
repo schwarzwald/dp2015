@@ -1,6 +1,10 @@
 /*
  This file is part of BitPunch
- Copyright (C) 2015 Frantisek Uhrecky <frantisek.uhrecky[what here]gmail.com>>
+ Copyright (C) 2013-2015 Frantisek Uhrecky <frantisek.uhrecky[what here]gmail.com>
+ Copyright (C) 2013-2015 Andrej Gulyas <andrej.guly[what here]gmail.com>
+ Copyright (C) 2013-2014 Marek Klein  <kleinmrk[what here]gmail.com>
+ Copyright (C) 2013-2014 Filip Machovec  <filipmachovec[what here]yahoo.com>
+ Copyright (C) 2013-2014 Jozef Kudlac <jozef[what here]kudlac.sk>
 
  This program is free software: you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -15,21 +19,15 @@
  You should have received a copy of the GNU General Public License
  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef SHA512_H
-#define SHA512_H
-
-#include <bitpunch/config.h>
-
-//#ifdef BPU_CONF_SHA_512
-#include <stdint.h>
+#ifndef BPU_CONSTWT_H
+#define BPU_CONSTWT_H
 
 #include <bitpunch/math/gf2types.h>
+#include <bitpunch/math/gf2.h>
+#include <stdint.h>
 
-#define BPU_HASH_LEN 64
+int bToCw(BPU_T_GF2_Vector *in, int *out, int i, int n, int t, int delta);
 
-int BPU_gf2VecHash(BPU_T_GF2_Vector *out, const BPU_T_GF2_Vector *in);
+int BPU_gf2VecToConstantWeight(BPU_T_GF2_Vector *out, BPU_T_GF2_Vector *in, int n, int wt);
 
-//#endif // BPU_CONF_SHA_512
-
-#endif // SHA512_H
-
+#endif // BPU_CONSTWT_H

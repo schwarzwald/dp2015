@@ -17,6 +17,7 @@
  */
 
 #include <bitpunch/code/codectx.h>
+#include <bitpunch/crypto/signature/sigctx.h>
 #include <bitpunch/code/goppa/goppatypes.h>
 #include <bitpunch/crypto/mecsctx.h>
 #include <bitpunch/debugio.h>
@@ -25,6 +26,7 @@
 #include <bitpunch/math/gf2x.h>
 #include <bitpunch/math/gf2xtypes.h>
 #include <bitpunch/math/permtypes.h>
+#include <bitpunch/math/constwt.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
@@ -251,59 +253,130 @@ int testKeyGenAsn1() {
 }
 #endif
 
+void testLdgm() {
+  BPU_T_Signature_Ctx *ctx = NULL;
+  BPU_T_UN_Signature_Params params;
+  BPU_T_UN_Signature signature;
+  BPU_T_GF2_Vector *message;
+  BPU_T_EN_Signature_Verification_Result_Type sigresult;
+
+  BPU_gf2VecMalloc(&message, 100);
+  BPU_gf2VecRand(message, 0);
+  fprintf(stderr, "init\n");
+  BPU_printGf2Vec(message);
+  //BPU_ldgmInitParams(&params.ldgm, 15, 5, 3, 1, 3, 1, 5, 5);
+  BPU_ldgmInitParams(&params.ldgm, 31, 10, 32, 2, 15, 15, 15, 21, 3);
+  BPU_signatureInitCtx(&ctx, &params, BPU_EN_SIGN_LDGM);
+  signature.ldgm = (BPU_T_LDGM_Signature*) calloc(sizeof(BPU_T_LDGM_Signature), 1);
+
+  fprintf(stderr, "generating\n");
+  ctx->_genKeyPair(ctx->code_ctx, &params);
+  fprintf(stderr, "signing\n");
+  ctx->_sign(&signature, message, ctx);
+  fprintf(stderr, "verifying\n");
+  ctx->_verify(&sigresult, message, &signature, ctx);
+
+  if (sigresult == BPU_EN_SIG_ACCEPT) {
+    fprintf(stderr, "ACCEPT");
+  } else {
+    fprintf(stderr, "DISCARD");
+  }
+
+  BPU_gf2VecFree(&message);
+  //BPU_codeFreeCtx(&ctx->code_ctx);
+}
+
 void testSomething() {
   BPU_T_GF2_QC_Matrix mat, tmat, rref, eye, eye2, app, selection, inv, product;
-  BPU_T_GF2_Poly poly;
+  BPU_T_GF2_Poly *poly, module, *invp;
   BPU_T_GF2_Matrix *a, *b, *c;
-  BPU_T_GF2_Vector *vec;
+  BPU_T_GF2_Vector *vec, *vec_in, vec1;
   int found = 0;
   int i = 0, j = 0;
+  int *arr;
   BPU_T_GF2 d;
   BPU_T_Perm_Vector *perm;
 
+  poly = (BPU_T_GF2_Poly*) calloc(sizeof(BPU_T_GF2_Poly), 1);
+  invp = (BPU_T_GF2_Poly*) calloc(sizeof(BPU_T_GF2_Poly), 1);
+  BPU_gf2PolyMalloc(poly, 3);
+
+  BPU_gf2VecSetBit(poly, 1, 1);
+
+  BPU_gf2PolyMalloc(&module, poly->len + 1);
+  BPU_gf2VecSetBit(&module, 0, 1);
+  BPU_gf2VecSetBit(&module, poly->len, 1);
+
+  found = BPU_gf2PolyInv(invp, poly, &module);
+
+  //fprintf(stderr, "found %d\n", found);
+  //BPU_printGf2Poly(&poly);
+  //BPU_printGf2Poly(&invp);
+
   // srand (time(NULL));
   //BPU_gf2QcMultirowMatrixMalloc(&mat, 3, 3, 3);
-  //BPU_gf2QcEyeMatrix(&eye, 3, 3);
+  /* BPU_gf2QcEyeMatrix(&eye, 3, 3);
 
-  int block_size = 5;
-  int weight_limit = 5;
-  int block_count = 5;
-  int count = 0;
+   int block_size = 5;
+   int weight_limit = 5;
+   int block_count = 5;
+   int count = 0;
 
-  while (!found) {
-    BPU_gf2QcMultirowMatrixMalloc(&mat, block_count, block_count, block_size);
+   while (!found) {
+   BPU_gf2QcMultirowMatrixMalloc(&mat, block_count, block_count, block_size);
 
-    for (i = 0; i < block_count * block_count; i++) {
-      BPU_gf2PolyInitRand(&mat.matrices[i], block_size, (rand() % weight_limit) + 1, 0);
-    }
+   for (i = 0; i < block_count * block_count; i++) {
+   BPU_gf2PolyInitRand(&mat.matrices[i], block_size, (rand() % weight_limit) + 1, 0);
+   }
 
-    found = BPU_gf2QcInvMatrix(&inv, &mat);
+   found = BPU_gf2QcInvMatrix(&inv, &mat);
 
-    if (!found) {
-      BPU_gf2QcMatrixFree(&mat, 0);
-      count++;
-    }
-  }
+   if (!found) {
+   BPU_gf2QcMatrixFree(&mat, 0);
+   count++;
+   }
+   }
 
-  BPU_printGf2QcMatrix(&mat);
-  BPU_permMalloc(&perm, block_count);
-  BPU_permRandomize(perm);
+   //BPU_printGf2QcMatrix(&mat);
+   BPU_permMalloc(&perm, block_count);
+   BPU_permRandomize(perm);
 
-  for (i = 0; i < block_count; i++) {
-    fprintf(stderr, "%d ", perm->elements[i]);
-  }
+   for (i = 0; i < block_count; i++) {
+   // fprintf(stderr, "%d ", perm->elements[i]);
+   }
 
-  BPU_gf2QcPermuteMatrixRows(&mat, perm);
-  BPU_printGf2QcMatrix(&mat);
-  fprintf(stderr, "counter %d", count);
+   BPU_gf2QcPermuteMatrixRows(&mat, perm);
+   //BPU_printGf2QcMatrix(&mat);
+   //  BPU_printGf2QcMatrix(&eye);
+   //fprintf(stderr, "counter %d", count);
 
-  //BPU_gf2QcMatrixMultiply(&product, &mat, &inv);
+   //BPU_gf2QcMatrixVectorMultiply(&vec1, &mat, vec);
+   //BPU_gf2QcMatrixGetRow(&vec1, &mat, 7);
+   //BPU_gf2VecShiftLeft(vec);
+   //i = read(vec, 5);
+   //  read(vec, 7);
+   //bToCw(vec, arr, 0, 200, 10, 0);
+   BPU_gf2VecMalloc(&vec_in, 20);
 
-  //BPU_gf2VecMalloc(&vec, 33);
-  //BPU_printGf2QcMatrix(&product);
-  //BPU_gf2MatMalloc(&a, 33, 33);
-  //BPU_gf2MatMalloc(&b, 33, 33);
+   BPU_gf2VecMalloc(&vec, 300);
+   BPU_gf2VecRand(vec, 0);
+   BPU_printGf2Vec(vec);
 
+   BPU_gf2VecToConstantWeight(vec_in, vec, 20, 5);
+
+   BPU_printGf2Vec(vec_in);
+
+   int sum = 0;
+
+   //fprintf(stderr, "\n sum: %d ", sum);
+
+   //BPU_gf2QcMatrixMultiply(&product, &mat, &inv);
+
+   //BPU_gf2VecMalloc(&vec, 33);
+   //BPU_printGf2QcMatrix(&product);
+   //BPU_gf2MatMalloc(&a, 33, 33);
+   //BPU_gf2MatMalloc(&b, 33, 33);
+   */
   /*for (i = 0; i < 33; i++) {
    BPU_gf2VecRand(vec, 0);
    for (j = 0; j < vec->elements_in_row; j++) {
@@ -326,7 +399,11 @@ void testSomething() {
 
 int main(int argc, char **argv) {
   int rc = 0;
-  testSomething();
+  int i = 0;
+  int *arr = (int*) calloc(sizeof(int), 5);
+  testLdgm();
+  // testSomething();
+
   return 0;
   // MUST BE NULL
   BPU_T_Mecs_Ctx *ctx = NULL;

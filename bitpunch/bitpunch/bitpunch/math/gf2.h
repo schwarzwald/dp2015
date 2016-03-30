@@ -194,7 +194,7 @@ void BPU_printGf2SparseQcMatrix(const BPU_T_GF2_Sparse_Qc_Matrix *v);
  * @param  bit       bit value 0 or 1
  */
 #define BPU_gf2MatSetBit(m_pointer, s, t, bit)  if (bit) { \
-												(m_pointer)->elements[s][t / (m_pointer)->element_bit_size] |= ((BPU_T_GF2) 1) << ((t) % (m_pointer)->element_bit_size);\
+												(m_pointer)->elements[s][(t) / (m_pointer)->element_bit_size] |= ((BPU_T_GF2) 1) << ((t) % (m_pointer)->element_bit_size);\
 												} \
 												else { \
 													/* this is like: 00101111 ^ 00000100 = 00101011 */\
@@ -345,6 +345,9 @@ int BPU_gf2VecConcat(BPU_T_GF2_Vector *out, const BPU_T_GF2_Vector *vec1, const 
  */
 int BPU_gf2VecCrop(BPU_T_GF2_Vector *out, const BPU_T_GF2_Vector *in, const int start, const int length);
 
+int BPU_gf2VecShiftLeft(BPU_T_GF2_Vector *in);
+
+int BPU_gf2VecIsZero(BPU_T_GF2_Vector *in);
 /**
  * Get matrix GF2 row as vector gf2. You can set alloc param, to allocate it dynamically inside function, or use allocated vector yet. When set alloc, after work call BPU_freeVecGF2
  * @param  out   vector
@@ -634,6 +637,12 @@ void BPU_gf2QcMatrixAddRowMultiple(BPU_T_GF2_QC_Matrix *out, int source, int tar
 void BPU_gf2QcPermuteMatrixColumns(BPU_T_GF2_QC_Matrix *out, BPU_T_Perm_Vector *permutation);
 
 void BPU_gf2QcPermuteMatrixRows(BPU_T_GF2_QC_Matrix *out, BPU_T_Perm_Vector *permutation);
+
+void BPU_gf2QcMatrixVectorMultiply(BPU_T_GF2_Vector *out, BPU_T_GF2_QC_Matrix *mat, BPU_T_GF2_Vector *vec);
+
+void BPU_gf2QcMatrixGetColumn(BPU_T_GF2_Vector *out, BPU_T_GF2_QC_Matrix *in, int column);
+
+void BPU_gf2QcMatrixGetRow(BPU_T_GF2_Vector *out, BPU_T_GF2_QC_Matrix *in, int row);
 
 int BPU_gf2QcMatrixToSparse(BPU_T_GF2_Sparse_Qc_Matrix *out, const BPU_T_GF2_QC_Matrix *in, const int wi[]);
 

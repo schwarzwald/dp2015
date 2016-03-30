@@ -29,11 +29,8 @@ typedef struct _BPU_T_LDGM_Spec {
   BPU_T_GF2_QC_Matrix *q_mat; ///< Weight controlling matrix Q
   BPU_T_GF2_QC_Matrix *s_mat; ///< Scrambler matrix S
   BPU_T_GF2_Matrix *b_mat;
-  uint16_t n0; ///< root length of the code (n = n0*p)
-  uint16_t k0; ///< root dimension of the code (k = k0*p)
-  uint16_t p; ///< size of the cyclic blocks
-  uint16_t z; ///< security parameter z
-  uint16_t w_t;
+  uint16_t c;
+
 } BPU_T_LDGM_Spec;
 
 /**
@@ -44,13 +41,18 @@ typedef struct _BPU_T_LDGM_Params {
   uint16_t k0; ///< root dimension of the code (k = k0*p)
   uint16_t p; ///< size of the cyclic blocks
   uint16_t z; ///< security parameter z
+  uint16_t w_t;
+  uint16_t w_s;
+  uint16_t w_g;
+  uint16_t c;
+  uint16_t t;
 } BPU_T_LDGM_Params;
 
 /**
  * @brief BPU_goppaFreeSpec Free Goppa code internal structure.
  * @param spec
  */
-void BPU_ldgmFreeSpec(BPU_T_LDGM_Params *spec);
+void BPU_ldgmFreeSpec(BPU_T_LDGM_Spec *spec);
 
 /**
  * @brief BPU_goppaInitParams Initi Goppa code params.
@@ -60,7 +62,8 @@ void BPU_ldgmFreeSpec(BPU_T_LDGM_Params *spec);
  * @param mod
  * @return
  */
-int BPU_ldgmInitParams(BPU_T_LDGM_Params **params, const uint16_t n0, const uint16_t k0, const uint16_t p, const uint16_t z);
+int BPU_ldgmInitParams(BPU_T_LDGM_Params **params, const uint16_t n0, const uint16_t k0, const uint16_t p, const uint16_t z, const uint16_t w_t,
+    const uint16_t w_s, const uint16_t w_g, const uint16_t t, const uint16_t c);
 
 /**
  * @brief BPU_goppaFreeParams Free goppa code params.

@@ -536,6 +536,33 @@ int BPU_gf2VecMulMat(BPU_T_GF2_Vector *out, const BPU_T_GF2_Vector *v, const BPU
   return 0;
 }
 
+int BPU_gf2VecShiftLeft(BPU_T_GF2_Vector *in) {
+  int i, bit, return_bit = BPU_gf2VecGetBit(in, 0);
+
+  for (i = 0; i < in->elements_in_row; i++) {
+    bit = BPU_getBit(in->elements[i], 0);
+    in->elements[i] >>= 1;
+
+    if (i > 0) {
+      in->elements[i - 1] |= (bit << (in->element_bit_size - 1));
+    }
+  }
+
+  return return_bit;
+}
+
+int BPU_gf2VecIsZero(BPU_T_GF2_Vector *in) {
+  int i;
+
+  for (i = 0; i < in->elements_in_row; i++) {
+    if (in->elements[i] != 0) {
+      return 0;
+    }
+  }
+
+  return 1;
+}
+
 void BPU_gf2MatXorRows(BPU_T_GF2_Matrix *mat, int i, int j) {
   int k;
 
@@ -1078,6 +1105,7 @@ int BPU_gf2PolyInv(BPU_T_GF2_Poly *out, const BPU_T_GF2_Poly *a, const BPU_T_GF2
   // free
   BPU_gf2PolyFree(&d, 0);
   BPU_gf2PolyFree(&s, 0);
+
   return ret;
 }
 
@@ -1270,19 +1298,35 @@ void BPU_gf2QcMatrixAdd(BPU_T_GF2_QC_Matrix *out, BPU_T_GF2_QC_Matrix *in) {
 
 int BPU_gf2QcInvMatrix(BPU_T_GF2_QC_Matrix *out, BPU_T_GF2_QC_Matrix *in) {
   BPU_T_GF2_QC_Matrix eye, appended, rref;
-  int found;
+  BPU_T_GF2_Poly *poly, one;
+  int found; //, i, j;
 
   if (in->column_element_count != in->row_element_count) {
     BPU_printError("BPU_gf2QcInvMatrix: Matrix must be a square matrix");
     return 0;
   }
 
+  BPU_gf2PolyMalloc(&one, in->element_size);
+  BPU_gf2VecSetBit(&one, 0, 1);
   BPU_gf2QcEyeMatrix(&eye, in->element_size, in->column_element_count);
   BPU_gf2QcAppendMatrix(&appended, in, &eye, 0);
   found = BPU_gf2QcMatrixToRref(&rref, &appended);
-
+  //BPU_printGf2QcMatrix(&rref);
   if (found) {
+    //for (i = 0; i < in->row_element_count; i++) {
+    //  for (j = 0; j < in->column_element_count; j++) {
+    //    poly = &rref.matrices[i * rref.row_element_count + j];
+    //    if (i != j && !BPU_gf2PolyIsZero(poly)) {
+    //      found = 0;
+    //    } else if (i == j && BPU_gf2VecCmp(&one, poly) != 0) {
+    //     found = 0;
+    //    }
+    //  }
+    //}
+
+    // if (found) {
     BPU_gf2QcSelectMatrix(out, &rref, in->column_element_count, in->column_element_count * 2, 0, in->column_element_count);
+    //}
   }
 
   BPU_gf2QcMatrixFree(&appended, 0);
@@ -1293,76 +1337,53 @@ int BPU_gf2QcInvMatrix(BPU_T_GF2_QC_Matrix *out, BPU_T_GF2_QC_Matrix *in) {
 }
 
 int BPU_gf2QcMatrixToRref(BPU_T_GF2_QC_Matrix *out, BPU_T_GF2_QC_Matrix *in) {
-  int i, j, k = 0, repeat = 0, pivot_found = 0, ret = 1;
-  BPU_T_GF2_Poly *temp, one, pivot, module;
+  int i, j, pivot_found = 0, min;
+  BPU_T_GF2_Poly *temp, *pivot, module;
   BPU_gf2QcMatrixCopy(out, in);
 
   BPU_gf2PolyMalloc(&module, out->element_size + 1);
   BPU_gf2VecSetBit(&module, 0, 1);
   BPU_gf2VecSetBit(&module, out->element_size, 1);
 
-  BPU_gf2PolyMalloc(&one, out->element_size);
-  BPU_gf2VecSetBit(&one, 0, 1);
+  min = in->column_element_count > in->row_element_count ? in->row_element_count : in->column_element_count;
 
-  for (i = 0; i < out->row_element_count; i++) {
+  for (i = 0; i < min; i++) {
     pivot_found = 0;
-    for (j = k; j < out->column_element_count; j++) {
+    for (j = i; j < out->column_element_count; j++) {
       temp = &out->matrices[i + j * out->row_element_count];
       if (!BPU_gf2PolyIsZero(temp)) {
-        if (BPU_gf2PolyInv(&pivot, temp, &module) == 1) {
+        pivot = (BPU_T_GF2_Poly*) calloc(sizeof(BPU_T_GF2_Poly), 1);
+        if (BPU_gf2PolyInv(pivot, temp, &module) == 1) {
           pivot_found = 1;
-          BPU_gf2QcMatrixSwapRowBlocks(out, j, k);
-          BPU_gf2QcMatrixMultiplyRow(out, k, &pivot);
-          BPU_gf2PolyFree(&pivot, 0);
-          //fprintf(stderr, "after row swap\n");
-          //BPU_printGf2QcMatrix(out);
-          repeat = 0;
+          BPU_gf2QcMatrixSwapRowBlocks(out, j, i);
+          BPU_gf2QcMatrixMultiplyRow(out, i, pivot);
+          BPU_gf2PolyFree(pivot, 1);
           break;
         }
 
-        BPU_gf2PolyFree(&pivot, 0);
+        BPU_gf2PolyFree(pivot, 1);
       }
     }
 
     if (!pivot_found) {
-      if (j == out->column_element_count && k < out->column_element_count) { //this is not satisfying enough
-      //sum some rows together a try again
-
-        /*for (j = k + repeat + 1; j < out->column_element_count; j++) {
-         BPU_gf2QcMatrixAddRowMultiple(out, k + repeat, j, &one);
-         }
-
-         if (k + repeat < out->column_element_count) {
-         repeat++;
-         i--;
-         } else {
-         ret = 0;
-         }*/
-        //k++;
-        ret = 0;
-        BPU_gf2PolyFree(&module, 0);
-        return 0;
-      }
-      continue;
+      BPU_gf2PolyFree(&module, 0);
+      return 0;
     }
 
     for (j = 0; j < in->column_element_count; j++) {
-      if (j == k) {
+      if (j == i) {
         continue;
       }
 
       temp = &out->matrices[i + j * out->row_element_count];
-      BPU_gf2QcMatrixAddRowMultiple(out, k, j, temp);
+      BPU_gf2QcMatrixAddRowMultiple(out, i, j, temp);
     }
-    //fprintf(stderr, "after elimination\n");
-    //BPU_printGf2QcMatrix(out);
 
-    k++;
   }
 
   BPU_gf2PolyFree(&module, 0);
 
-  return ret;
+  return 1;
 }
 
 void BPU_gf2QcMatrixSwapRowBlocks(BPU_T_GF2_QC_Matrix *in, int row1, int row2) {
@@ -1439,7 +1460,6 @@ void BPU_gf2QcPermuteMatrixColumns(BPU_T_GF2_QC_Matrix *out, BPU_T_Perm_Vector *
   }
 
   for (i = 0; i < permutation->size; i++) {
-
     for (j = 0; j < permutation->size; j++) {
       if (permutation_track[j] == permutation->elements[i]) {
         p = j;
@@ -1468,7 +1488,6 @@ void BPU_gf2QcPermuteMatrixRows(BPU_T_GF2_QC_Matrix *out, BPU_T_Perm_Vector *per
   }
 
   for (i = 0; i < permutation->size; i++) {
-
     for (j = 0; j < permutation->size; j++) {
       if (permutation_track[j] == permutation->elements[i]) {
         p = j;
@@ -1485,6 +1504,76 @@ void BPU_gf2QcPermuteMatrixRows(BPU_T_GF2_QC_Matrix *out, BPU_T_Perm_Vector *per
       out->matrices[j + out->column_element_count * i] = out->matrices[j + out->column_element_count * p];
       out->matrices[j + out->column_element_count * p] = temp;
     }
+  }
+}
+
+void BPU_gf2QcMatrixVectorMultiply(BPU_T_GF2_Vector *out, BPU_T_GF2_QC_Matrix *mat, BPU_T_GF2_Vector *vec) {
+  int i;
+  BPU_T_GF2_Vector column;
+
+  if (mat->row_element_count * mat->element_size != vec->len) {
+    BPU_printError("BPU_gf2QcMatrixVectorMultiply: Incompatible matrix and vector dimensions.");
+    return;
+  }
+
+  BPU_gf2VecMallocElements(out, mat->column_element_count * mat->element_size);
+
+  for (i = 0; i < vec->len; i++) {
+    if (BPU_gf2VecGetBit(vec, i)) {
+      BPU_gf2QcMatrixGetColumn(&column, mat, i);
+      BPU_gf2VecXor(out, &column);
+      free(column.elements);
+    }
+  }
+}
+
+void BPU_gf2QcMatrixGetColumn(BPU_T_GF2_Vector *out, BPU_T_GF2_QC_Matrix *in, int column) {
+  int i, j, bit, block, position;
+  BPU_T_GF2_Poly transp;
+
+  BPU_gf2VecMallocElements(out, in->column_element_count * in->element_size);
+
+  block = column / in->element_size;
+  position = column % in->element_size;
+
+  for (i = 0; i < in->column_element_count; i++) {
+    BPU_gf2PolyTransp(&transp, &in->matrices[i * in->row_element_count + block]);
+
+    for (j = 0; j < position; j++) {
+      BPU_gf2PolyMulX(&transp);
+    }
+
+    for (j = 0; j < transp.len; j++) {
+      bit = BPU_gf2VecGetBit(&transp, j);
+      BPU_gf2VecSetBit(out, i * transp.len + j, bit);
+    }
+
+    BPU_gf2PolyFree(&transp, 0);
+  }
+}
+
+void BPU_gf2QcMatrixGetRow(BPU_T_GF2_Vector *out, BPU_T_GF2_QC_Matrix *in, int row) {
+  int i, j, bit, block, position;
+  BPU_T_GF2_Poly block_poly;
+
+  block = row / in->element_size;
+  position = row % in->element_size;
+
+  BPU_gf2VecMallocElements(out, in->row_element_count * in->element_size);
+
+  for (i = 0; i < in->row_element_count; i++) {
+    BPU_gf2PolyCopy(&block_poly, &in->matrices[block * in->row_element_count + i]);
+
+    for (j = 0; j < position; j++) {
+      BPU_gf2PolyMulX(&block_poly);
+    }
+
+    for (j = 0; j < block_poly.len; j++) {
+      bit = BPU_gf2VecGetBit(&block_poly, j);
+      BPU_gf2VecSetBit(out, i * block_poly.len + j, bit);
+    }
+
+    BPU_gf2PolyFree(&block_poly, 0);
   }
 }
 
