@@ -26,9 +26,9 @@
 			\end{table}
 	\subsubsection{Funkcia $\phi$}
 		\noindent
-			Prvou dôleitou súèasou pre celú implementáciu, je zvoli funkciu $\phi$, ktorá jednoznaène mapuje vektor dåky $n$ 
-			na vektor dåky $l$ s váhou $t$ a má inverziu. Pre tento úèel zvolíme algoritmus, ktorı navrhol Sendrier v [xx], ktorı
-			má lineárnu zloitos. Implementácia (mierne upravená pre naše potreby) a jej inverzia vyzerá nasledovne.
+			Dôleitou súèasou pre celú implementáciu, je zvoli funkciu $\phi$, ktorá jednoznaène mapuje vektor dåky $n$ 
+			na vektor dåky $l$ s váhou $t$. Pre tento úèel zvolíme algoritmus, ktorı navrhol Sendrier v [xx], ktorı
+			má lineárnu zloitos. Implementácia (mierne upravená pre naše potreby) vyzerá nasledovne.
 			
 			\begin{algorithm}[h]
 				\caption{Funkcia $\phi$}
@@ -40,17 +40,111 @@
 				\end{algorithmic}
 			\end{algorithm}
 			
+	\subsubsection{Funkcia $\psi$}
+	
+	\subsubsection{Generovanie k¾úèov}
+		\noindent
+			Generovanie páru k¾úèov sa skladá z viacerıch krokov
+			
+			\begin{description}
+				\item[$\bullet$] Vygenerova generujúcu maticu $G$
+				\item[$\bullet$] Vygenerova maticu $Q$
+				\item[$\bullet$] Vygenerova maticu $S$
+				\item[$\bullet$] Vypoèíta maticu $H_{pub}$
+			\end{description}
+			
+			Pseudokód generovania k¾úèov je zhrnutı v algoritme XX
+			
 			\begin{algorithm}[h]
-				\caption{Funkcia $\phi^{-1}$}
-				\label{phi-inv-function}
+				\caption{Generovanie k¾úèov}
+				\label{key-gen}
 				\begin{algorithmic}
-					\INPUT Vektor dåky $l$, parameter $n$, parameter $t$
-					\OUTPUT Vektor dåky $n$
+					\INPUT Parametre kódu a schémy - $params$
+					\OUTPUT Pár k¾úèov
 
+					\State $G = generateGenMatrix(params)$
+										
+					\Repeat
+						\State $Q = generateMatrixQ(params)$
+						\State $Q_{inv} = tryToInvert(Q)$
+					\Until{exists($Q_{inv})}
+					
+					\Repeat
+						\State $S = generateMatrixS(params)$
+						\State $S_{inv} = tryToInvert(S)$
+					\Until{exists($S_{inv})}
+					
+					$H_{pub} = buildMatrixH(G, Q_{inv}, S_{inv})$				
 				\end{algorithmic}
 			\end{algorithm}
 			
-	\subsubsection{Funkcia $\psi$}
+			Kadı krok generovania rozoberieme v osobitnej èasti. 
+			Pod¾a návrhu schémy potrebujeme inverzné matice Q^{-1} a S^{-1}, take matice Q a S musia by regulárne.
+			Pseudokód v algoritme XX ukazuje, e sme na generovanie matíc Q a S zvolili stratégiu generuj a testuj a teda
+			ak sa nám nepodarí vygenerovnú maticu invertova, generovanie opakujeme. 
+			
+			\noindent
+			Invertovanie kvazicyklickıch matíc zohráva pri generovaní k¾úèov podstatnú úlohu. Preto predtım ako si priblíime 
+			algoritmy na generovanie matíc Q a S, sa budeme venova invertovaniu kvázicyklickıch matíc.
+	
+	\subsubsection{Invertovanie QC matice}
+		\noindent
+			Binárne cirkulantné matice ve¾kosti $n$ môu by reprezentované polynómom $P(x)$ z $GF(2)/x^n-1$. 
+			$P(x)$ je stupòa maximálne $n-1$ a reprezentuje prvı riadok cirkulantnej matice, $i$-ty riadok matice je reprezentovanı
+			polynómom $x^{i-1}P(x)$ pre $i \in {1, ..., n}$.
+			
+		\noindent 
+			Kvázicyklická matica je matica, ktorej všetky prvky sú polynómy z $GF(2)/x^n-1$. Kadı polynóm predstavuje jeden cirkulantnı
+			blok. Pre kvázicyklickú maticu môeme riadkovo ekvivalentné operácie rozšíri o operácie, ktoré pracujú nad blokmi. To znamená,
+			e na poèítanie inverznej matice môeme poui Gaussovu eliminaènú metódu nad okruhom polynómov. Kvázicyklickú maticu M ve¾kosti n rozšírime
+			zprava o jednotkovú maticu (tie v QC tvare). Rošírenú maticu upravíme do redukovaného stupòovitého tvaru. Maticu M^{-1} potom tvoria
+			ståpce <n+1, 2n>.
+				
+			\begin{algorithm}[h]
+				\caption{Invertovanie QC matice}
+				\label{inv-qc}
+				\begin{algorithmic}
+					\INPUT QC matica $M$
+					\OUTPUT QC matica $M^{-1} ak existuje, inak 0
+					
+					\State $M_{eye} = [M | I]
+					
+					\State for i=1:n
+						\State for j=i:n
+							\State if existsPolynomialInverse(M_{eye}[j][i]) then
+							\State inverse = polynomialInverse(M_{eye}[j][i])
+							\State swap(M_{eye}[i], M_{eye}[j])
+							\State M_{eye}[i] = M_{eye}[i] * inverse
+							\State break
+							\State end
+						\State end	
+				
+						\State if exists(inverse) then
+							\State for j=1:n
+								\State if j==i then continue end;
+								\State M_{eye}[j] = M_{eye}[j] + M_{eye}[i]*M_{eye}[j][i];
+							\State end
+						\State else
+							\State return 0
+						\State end
+					\State end
+					
+					return M_{eye}[1:n][n+1:2n]
+					
+				\end{algorithmic}
+			\end{algorithm}
+			
+		\noindent
+			Na to aby sme pomocou jedného riadku mohli eliminova ostatné, potrebujeme nájs vedúci prvok (pivot). V polynomickej reprezentácii to znamená nájs
+			v ståpci prvok, ktorı sa dá invertova modulo $x^n-1$. Inverziu h¾adáme pomocou Euklidovho rozšíreného algoritmu. Ak nájdeme pivot, pripoèítame k ostatnım 
+			riadkom takı násobok riadku ktorı obsahuje pivot, aby sme v ståpci nad aj pod ním dostali nuly. Ak v ståpci pivot nenájdeme, buï matica nie je regulárna
+			a teda inverzia neexistuje, alebo je štruktúra matice taká, e jednoduchou Gaussovou elimináciou nie sme schopní inverziu nájs. Je dôleité zdôrazni, e
+			èi inverzia existuje alebo nie, nie sme schopní z vısledku algoritmu urèi. Ak inverzia neexistuje, algoritmus je neúspešní, ale môe nasta prípad keï
+			inverzia existuje ale napriek tomu algoritmus inverziu nevypoèíta.
+			
+
+			
+	\subsubsection{Generovanie matice G}
 	
 	\subsubsection{Generovanie matice Q}
 		\noindent
@@ -59,7 +153,7 @@
 			Matica $T$ sa skladá z cirkulantnıch matíc s rozmerom $p \times p$. A váha kadého riadku a ståpca je $w_t$, nepárne.
 			Uvedieme si algoritmus na generovanie matice $T$.
 			\begin{algorithm}[h]
-				\caption{Generovanie  regulárnej matice z cirkulantnıch blokov}
+				\caption{Generovanie regulárnej matice z cirkulantnıch blokov}
 				\label{gen-mat-reg}
 				\begin{algorithmic}
 					\INPUT Poèet cirkulantnıch blokov - $r_0$, ve¾kos bloku - $p$, predpísaná váha $w_t$

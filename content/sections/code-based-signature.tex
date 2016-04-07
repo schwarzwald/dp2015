@@ -182,7 +182,7 @@
 			\INPUT Správa $m$, podpis $(e', i)$
 			\OUTPUT True/False - podpis prijímame/zamietame
 			
-			\If{$wt(e') \leq (w_tw + w_c)w_s$}
+			\If{$wt(e') > (w_tw + w_c)w_s$}
 				\State \Return False
 			\Else
 				\State $s \gets \phi(H(m) || i)$
