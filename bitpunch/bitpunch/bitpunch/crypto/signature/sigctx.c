@@ -39,6 +39,8 @@ int BPU_signatureInitCtx(BPU_T_Signature_Ctx **ctx, const BPU_T_UN_Signature_Par
     return BPU_EC_MALLOC_ERROR;
   }
 
+  ctx_p->params = params;
+
   switch (type) {
   case BPU_EN_SIGN_LDGM:
     ctx_p->code_ctx->t = params->ldgm->t;

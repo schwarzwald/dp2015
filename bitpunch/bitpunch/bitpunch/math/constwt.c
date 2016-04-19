@@ -10,18 +10,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-int read(BPU_T_GF2_Vector *in, int l) {
-  //fprintf(stderr, "%d ", l);
-  int ret = 0;
-  int i = 0;
-  while (i < l) { //l-- > 0) {
-    ret |= BPU_gf2VecShiftLeft(in) << i;
-    i++;
-  }
-
-  return ret;
-}
-
 int decode(BPU_T_GF2_Vector *in, int d) {
   int u = 2;
   int delta = 0;
@@ -37,9 +25,9 @@ int decode(BPU_T_GF2_Vector *in, int d) {
   }
 
   pow = 1 << u;
-  delta = read(in, u - 1);
+  delta = BPU_gf2VecShiftRead(in, u - 1);
   if (delta >= pow - d) {
-    delta = 2 * delta + read(in, 1) - pow + d;
+    delta = 2 * delta + BPU_gf2VecShiftRead(in, 1) - pow + d;
   }
 
   return delta;
@@ -69,7 +57,7 @@ int bToCw(BPU_T_GF2_Vector *in, int *out, int i, int n, int t, int delta) {
     bToCw(in, out, i + 1, n - 1, t - 1, 0);
   } else {
     d = (int) best_d(n, t);
-    if (read(in, 1) == 1) {
+    if (BPU_gf2VecShiftRead(in, 1) == 1) {
       bToCw(in, out, i, n - d, t, delta + d);
     } else {
       c = decode(in, d);
@@ -82,14 +70,16 @@ int bToCw(BPU_T_GF2_Vector *in, int *out, int i, int n, int t, int delta) {
 }
 
 int BPU_gf2VecToConstantWeight(BPU_T_GF2_Vector *out, BPU_T_GF2_Vector *in, int n, int wt) {
-  int i, j = 0, *array;
+  int i, j = 0, *array, index;
 
   array = (int*) calloc(sizeof(int), wt);
 
   bToCw(in, array, 0, n, wt, 0);
 
   for (i = 0; i < wt; i++) {
-    BPU_gf2VecSetBit(out, j + array[i], 1);
+    index = j + array[i];
+    index = index > out->len - 1 ? out->len - 1 : index;
+    BPU_gf2VecSetBit(out, index, 1);
     j += array[i] + 1;
   }
 

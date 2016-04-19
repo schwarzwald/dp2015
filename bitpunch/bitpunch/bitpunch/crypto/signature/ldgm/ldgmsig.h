@@ -34,6 +34,6 @@ int BPU_gf2ToConstantWeight(BPU_T_GF2_Vector *out, BPU_T_GF2_Vector *in, int len
 int BPU_ldgmVerify(BPU_T_EN_Signature_Verification_Result_Type* result, BPU_T_GF2_Vector *message, const BPU_T_UN_Signature *signature,
     const struct _BPU_T_Signature_Ctx *ctx);
 
-int BPU_ldgmGenKeyPair(struct _BPU_T_Code_Ctx *ctx, BPU_T_UN_Signature_Params *params);
+int BPU_ldgmGenKeyPair(struct _BPU_T_Signature_Ctx *sig_ctx);
 
 #endif // LDGMSIG_H 

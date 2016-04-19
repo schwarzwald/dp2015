@@ -185,12 +185,18 @@ void BPU_gf2SparseQcMatrixFree(BPU_T_GF2_Sparse_Qc_Matrix *v, int is_dyn) {
 void BPU_gf2PolyFree(BPU_T_GF2_Poly *p, int is_dyn) {
   free(p->elements);
 
+  p->elements = NULL;
+
   if (is_dyn) {
     free(p);
   }
 }
 
 int BPU_gf2PolyMalloc(BPU_T_GF2_Poly *p, int len) {
+
+  if (p->elements) {
+    return 0;
+  }
   // element size in bits
   p->element_bit_size = sizeof(BPU_T_GF2) * 8;
 
@@ -249,7 +255,7 @@ int BPU_gf2QcMultirowMatrixMalloc(BPU_T_GF2_QC_Matrix *v, int row_element_count,
   int err = 0;
 
   // allocate matrices
-  v->matrices = (BPU_T_GF2_Poly*) malloc(row_element_count * column_element_count * sizeof(BPU_T_GF2_Poly));
+  v->matrices = (BPU_T_GF2_Poly*) calloc(row_element_count * column_element_count, sizeof(BPU_T_GF2_Poly));
 
   v->n = row_element_count * element_size;
   v->k = column_element_count * element_size;

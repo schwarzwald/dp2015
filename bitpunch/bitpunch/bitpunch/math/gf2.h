@@ -348,6 +348,10 @@ int BPU_gf2VecCrop(BPU_T_GF2_Vector *out, const BPU_T_GF2_Vector *in, const int 
 int BPU_gf2VecShiftLeft(BPU_T_GF2_Vector *in);
 
 int BPU_gf2VecIsZero(BPU_T_GF2_Vector *in);
+
+int BPU_gf2VecGetWeight(BPU_T_GF2_Vector *in);
+
+int BPU_gf2VecShiftRead(BPU_T_GF2_Vector *in, int bits_to_read);
 /**
  * Get matrix GF2 row as vector gf2. You can set alloc param, to allocate it dynamically inside function, or use allocated vector yet. When set alloc, after work call BPU_freeVecGF2
  * @param  out   vector
@@ -558,6 +562,7 @@ void BPU_gf2SparsePolyCopy(BPU_T_GF2_Sparse_Poly *out, const BPU_T_GF2_Sparse_Po
  */
 void BPU_gf2PolyCopy(BPU_T_GF2_Poly *out, const BPU_T_GF2_Poly *in);
 
+void BPU_gf2PolyReset(BPU_T_GF2_Poly *out);
 /**
  * Initialize random polynomial. After work you have to free memory using call BPU_gf2PolyFree.
  * @param out output polynomial
@@ -632,7 +637,7 @@ void BPU_gf2QcMatrixCopy(BPU_T_GF2_QC_Matrix *out, BPU_T_GF2_QC_Matrix *in);
 
 void BPU_gf2QcMatrixMultiplyRow(BPU_T_GF2_QC_Matrix *out, int row, BPU_T_GF2_Poly *multiple);
 
-void BPU_gf2QcMatrixAddRowMultiple(BPU_T_GF2_QC_Matrix *out, int source, int target, BPU_T_GF2_Poly *multiple);
+void BPU_gf2QcMatrixAddRowMultiple(BPU_T_GF2_QC_Matrix *out, int source, int target, BPU_T_GF2_Poly *multiple, BPU_T_GF2_Poly *module);
 
 void BPU_gf2QcPermuteMatrixColumns(BPU_T_GF2_QC_Matrix *out, BPU_T_Perm_Vector *permutation);
 

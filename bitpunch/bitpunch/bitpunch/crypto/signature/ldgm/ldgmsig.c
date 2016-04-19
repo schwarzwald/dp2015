@@ -73,6 +73,15 @@ int BPU_ldgmVerify(BPU_T_EN_Signature_Verification_Result_Type* result, BPU_T_GF
   BPU_T_GF2_Vector *hash, *counter, *message_with_counter, *s, *s1;
   int r = ctx->code_ctx->code_spec->ldgm->b_mat->n;
   int wt = ctx->code_ctx->t;
+  int sig_wt = BPU_gf2VecGetWeight(signature->ldgm->signature);
+  BPU_T_LDGM_Params *params = ctx->params->ldgm;
+  int wt_limit = (params->w_t * params->t + params->c * params->w_g) * params->w_s;
+
+  if (sig_wt > wt_limit) {
+    *result = BPU_EN_SIG_DISCARD;
+    //fprintf(stderr, "not matching %d, %d", sig_wt, wt_limit);
+    return 0;
+  }
 
   BPU_gf2VecMalloc(&counter, 32);
   BPU_gf2VecMalloc(&message_with_counter, 512 + 32);
@@ -85,15 +94,13 @@ int BPU_ldgmVerify(BPU_T_EN_Signature_Verification_Result_Type* result, BPU_T_GF
   BPU_gf2VecConcat(message_with_counter, message, counter);
   BPU_gf2VecHash(hash, message_with_counter);
   BPU_gf2VecToConstantWeight(s, hash, r, wt);
-  BPU_printGf2Vec(s);
   BPU_ldgmEncode(s1, signature->ldgm->signature, ctx->code_ctx);
-  BPU_printGf2Vec(s1);
   *result = BPU_gf2VecCmp(s1, s) == 0 ? BPU_EN_SIG_ACCEPT : BPU_EN_SIG_DISCARD;
 
   return 0;
 }
 
-int BPU_ldgmGenKeyPair(struct _BPU_T_Code_Ctx *ctx, BPU_T_UN_Signature_Params *params) {
-  BPU_ldgmGenKeys(ctx, params->ldgm);
+int BPU_ldgmGenKeyPair(struct _BPU_T_Signature_Ctx *sig_ctx) {
+  BPU_ldgmGenKeys(sig_ctx->code_ctx, sig_ctx->params->ldgm);
   return 0;
 }

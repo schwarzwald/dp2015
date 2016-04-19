@@ -31,7 +31,6 @@ int BPU_ldgmDecode(BPU_T_GF2_Vector *out, BPU_T_GF2_Vector *in, const struct _BP
   BPU_gf2VecMalloc(&s1, in->len);
   BPU_gf2QcMatrixVectorMultiply(s1, ctx->code_spec->ldgm->q_mat, in);
   BPU_gf2VecMalloc(&e, ctx->code_spec->ldgm->g_mat->n);
-
   for (i = 0; i < in->len; i++) {
     BPU_gf2VecSetBit(e, (k + i), BPU_gf2VecGetBit(s1, i));
   }
@@ -57,7 +56,7 @@ void BPU_ldgmAddCodeWord(BPU_T_GF2_Vector *out, BPU_T_GF2_Vector *in, const stru
 
   for (i = 0; i < word_count; i++) {
     word = (BPU_T_GF2_Vector*) calloc(sizeof(BPU_T_GF2_Vector), 1);
-    index = read(hash, bits_to_read);
+    index = BPU_gf2VecShiftRead(hash, bits_to_read);
     BPU_gf2QcMatrixGetRow(word, ctx->code_spec->ldgm->g_mat, index < rows ? index : rows - 1);
     BPU_gf2VecXor(out, word);
     BPU_gf2VecFree(&word);
@@ -141,7 +140,11 @@ int BPU_ldgmGenerateGenMatrix(BPU_T_LDGM_Params *params, BPU_T_GF2_QC_Matrix *g_
     }
 
     for (j = 0; j < r0; j++) {
-      BPU_gf2PolyInitRand(&random_matrix.matrices[i * r0 + j], params->p, blocks[j], 0);
+      if (blocks[j] > 0) {
+        BPU_gf2PolyInitRand(&random_matrix.matrices[i * r0 + j], params->p, blocks[j], 0);
+      } else {
+        BPU_gf2PolyMalloc(&random_matrix.matrices[i * r0 + j], params->p);
+      }
       blocks[j] = 0;
     }
   }
@@ -159,6 +162,7 @@ int BPU_ldgmGenerateQMatrix(BPU_T_LDGM_Params *params, BPU_T_GF2_QC_Matrix *q_ma
   BPU_T_GF2_Vector *rand1, *rand2;
   BPU_T_GF2_QC_Matrix matR, matT;
   BPU_T_GF2_Poly ones;
+  ones.elements = NULL;
 
   int i, j, k, r0 = params->n0 - params->k0;
 
@@ -231,6 +235,7 @@ int BPU_ldgmGenerateConstantWeightQcMatrix(BPU_T_GF2_QC_Matrix *out, int blocks_
   BPU_T_GF2_Poly block_poly;
   BPU_T_Perm_Vector *permutation;
 
+  block_poly.elements = NULL;
   blocks[0] = 1;
 
   while (i > 0) { //TODO: adjust to even weight too

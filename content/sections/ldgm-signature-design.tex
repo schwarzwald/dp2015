@@ -2,35 +2,16 @@
 	\noindent
 		V tejto èasti navrhneme implementáciu LDGM podpisovej schémy a predstavíme konkrétne algoritmy
 		na generovanie k¾úèov, podpisov a overovacie funkcie. 
-	\subsubsection{Volite¾né parametre}
-		\noindent
-			Zhròme si najskôr všetky volite¾né parametre a funkcie pre celú podpisovú schému LDGM
-			
-			\begin{table}[h]
-			\centering
-			\caption{Parametre a funkcie LDGM}
-			\label{Parametre a funkcie LDGM}
-				\begin{tabular}{ll}
-				\textbf{Parameter} & \textbf{Popis}                                                      \\
-				$n$                  & dåka kódu ($n_0p$)                                                    \\
-				$k$                  & dimenzia kódu ($k_0p$)                                                 \\
-				$t $                 & poèet opravite¾nıch chıb                                            \\
-				$p$                  & ve¾kos cirkulantnıch matíc                                         \\
-				$z$                  & poèet riadkov matice $a$,$b$  pozn. ($z \leq (n-k)$)                          \\
-				$w_t$               & váha riadku/ståpca matice $T$                                         \\
-				$w_s$               & váha riadku/ståpca matice $S$                                         \\
-				$w_c$              & váha slova $c$, ktoré urèuje funkcia $\psi$                              \\
-				$\psi$                & funkcia, ktorá jednoznaène priradí správe $m$ kódové slovo $c$          \\
-				$\phi$                & funkcia, ktorá zobrazuje slová dåky $x$ na vektory dåky $y$ s váhou $z$
-				\end{tabular}
-			\end{table}
+	
 	\subsubsection{Funkcia $\phi$}
 		\noindent
 			Dôleitou súèasou pre celú implementáciu, je zvoli funkciu $\phi$, ktorá jednoznaène mapuje vektor dåky $n$ 
-			na vektor dåky $l$ s váhou $t$. Pre tento úèel zvolíme algoritmus, ktorı navrhol Sendrier v [xx], ktorı
-			má lineárnu zloitos. Implementácia (mierne upravená pre naše potreby) vyzerá nasledovne.
+			na vektor dåky $l$ s váhou $t$. Pre tento úèel zvolíme algoritmus, ktorı navrhol Sendrier v rámci CFS schémy v [xx]. Tento algoritmus má lineárnu zloitos a
+			oproti algoritmu, ktorı pouili autori LDGM schémy ponúka vırazné zrıchlenie celého vıpoètu.
 			
-			\begin{algorithm}[h]
+			Implementácia ako ju navrhol Sendrier je uvedená v algoritme XX.
+			
+			\begin{algorithm}[ht]
 				\caption{Funkcia $\phi$}
 				\label{phi-function}
 				\begin{algorithmic}
@@ -61,31 +42,41 @@
 				\begin{algorithmic}
 					\INPUT Parametre kódu a schémy - $params$
 					\OUTPUT Pár k¾úèov
-
-					\State $G = generateGenMatrix(params)$
+			
+			
+					\State $G \gets generateGenMatrix(params)$
+					
+					\Repeat
+						\State $Q \gets generateMatrixQ(params)$
+						\State $Q_{inv} \gets tryToInvert(Q)$
+					\Until{$exists(Q_{inv})$}
+					
 										
 					\Repeat
-						\State $Q = generateMatrixQ(params)$
-						\State $Q_{inv} = tryToInvert(Q)$
-					\Until{exists($Q_{inv})}
+						\State $S \gets generateMatrixS(params)$
+						\State $S_{inv} \gets tryToInvert(S)$
+					\Until{$exists(S_{inv})$}
 					
-					\Repeat
-						\State $S = generateMatrixS(params)$
-						\State $S_{inv} = tryToInvert(S)$
-					\Until{exists($S_{inv})}
+					\State
+					\State $H_{pub} \gets buildMatrixH(G, Q_{inv}, S_{inv})$	
+					\State $PublicKey \gets H_{pub}$
+					\State $PrivateKey \gets G, Q_{inv}, S_{inv}$
 					
-					$H_{pub} = buildMatrixH(G, Q_{inv}, S_{inv})$				
+					\State \Return $PrivateKey$, $PublicKey$
+
+					
 				\end{algorithmic}
 			\end{algorithm}
-			
+	
+				
 			Kadı krok generovania rozoberieme v osobitnej èasti. 
-			Pod¾a návrhu schémy potrebujeme inverzné matice Q^{-1} a S^{-1}, take matice Q a S musia by regulárne.
-			Pseudokód v algoritme XX ukazuje, e sme na generovanie matíc Q a S zvolili stratégiu generuj a testuj a teda
+			Pod¾a návrhu schémy potrebujeme inverzné matice $Q^{-1}$ a $S^{-1}$, take matice $Q$ a $S$ musia by regulárne.
+			Pseudokód v algoritme XX ukazuje, e sme na generovanie matíc $Q$ a $S$ zvolili stratégiu generuj a testuj a teda
 			ak sa nám nepodarí vygenerovnú maticu invertova, generovanie opakujeme. 
 			
 			\noindent
 			Invertovanie kvazicyklickıch matíc zohráva pri generovaní k¾úèov podstatnú úlohu. Preto predtım ako si priblíime 
-			algoritmy na generovanie matíc Q a S, sa budeme venova invertovaniu kvázicyklickıch matíc.
+			algoritmy na generovanie matíc $Q$ a $S$, sa budeme venova invertovaniu kvázicyklickıch matíc.
 	
 	\subsubsection{Invertovanie QC matice}
 		\noindent
@@ -96,52 +87,57 @@
 		\noindent 
 			Kvázicyklická matica je matica, ktorej všetky prvky sú polynómy z $GF(2)/x^n-1$. Kadı polynóm predstavuje jeden cirkulantnı
 			blok. Pre kvázicyklickú maticu môeme riadkovo ekvivalentné operácie rozšíri o operácie, ktoré pracujú nad blokmi. To znamená,
-			e na poèítanie inverznej matice môeme poui Gaussovu eliminaènú metódu nad okruhom polynómov. Kvázicyklickú maticu M ve¾kosti n rozšírime
-			zprava o jednotkovú maticu (tie v QC tvare). Rošírenú maticu upravíme do redukovaného stupòovitého tvaru. Maticu M^{-1} potom tvoria
-			ståpce <n+1, 2n>.
-				
-			\begin{algorithm}[h]
+			e na poèítanie inverznej matice môeme poui Gaussovu eliminaènú metódu nad okruhom polynómov. Kvázicyklickú maticu $M$ ve¾kosti $n$ rozšírime
+			zprava o jednotkovú maticu (tie v QC tvare). Rošírenú maticu upravíme do redukovaného stupòovitého tvaru. Maticu $M^{-1}$ potom tvoria
+			ståpce $<n+1, 2n>$.
+			
+				\begin{algorithm}[h]
 				\caption{Invertovanie QC matice}
 				\label{inv-qc}
 				\begin{algorithmic}
 					\INPUT QC matica $M$
-					\OUTPUT QC matica $M^{-1} ak existuje, inak 0
+					\OUTPUT QC matica $M^{-1}$ ak existuje, inak 0
 					
-					\State $M_{eye} = [M | I]
+					\State $M_{eye} \gets [M | I]$
 					
-					\State for i=1:n
-						\State for j=i:n
-							\State if existsPolynomialInverse(M_{eye}[j][i]) then
-							\State inverse = polynomialInverse(M_{eye}[j][i])
-							\State swap(M_{eye}[i], M_{eye}[j])
-							\State M_{eye}[i] = M_{eye}[i] * inverse
-							\State break
-							\State end
-						\State end	
+					\For{$i \gets 1$ \To $n$}
+						\For{$j \gets i$ \To $n$}
+							\If{$existsPolynomialInverse(M_{eye}[j][i])$}
+								\State $inverse \gets polynomialInverse(M_{eye}[j][i])$
+								\State $swap(M_{eye}[i], M_{eye}[j])$
+								\State $M_{eye}[i] \gets M_{eye}[i] * inverse$
+								\Break
+							\EndIf
+						\EndFor
 				
-						\State if exists(inverse) then
-							\State for j=1:n
-								\State if j==i then continue end;
-								\State M_{eye}[j] = M_{eye}[j] + M_{eye}[i]*M_{eye}[j][i];
-							\State end
-						\State else
-							\State return 0
-						\State end
-					\State end
+						\If{$exists(inverse)$}
+							\For{$j \gets 1$ \To $n$}
+								\If{$j=i$}
+									\Continue
+								\EndIf
+								\State $M_{eye}[j] \gets M_{eye}[j] + M_{eye}[i]*M_{eye}[j][i]$
+							\EndFor
+						\Else
+							\State \Return 0
+						\EndIf
+					\EndFor
 					
-					return M_{eye}[1:n][n+1:2n]
+					\State \Return $M_{eye}[1:n][n+1:2n]$
 					
 				\end{algorithmic}
 			\end{algorithm}
-			
+
+					
 		\noindent
 			Na to aby sme pomocou jedného riadku mohli eliminova ostatné, potrebujeme nájs vedúci prvok (pivot). V polynomickej reprezentácii to znamená nájs
 			v ståpci prvok, ktorı sa dá invertova modulo $x^n-1$. Inverziu h¾adáme pomocou Euklidovho rozšíreného algoritmu. Ak nájdeme pivot, pripoèítame k ostatnım 
-			riadkom takı násobok riadku ktorı obsahuje pivot, aby sme v ståpci nad aj pod ním dostali nuly. Ak v ståpci pivot nenájdeme, buï matica nie je regulárna
+			riadkom takı násobok riadku, ktorı obsahuje pivot, aby sme v ståpci nad aj pod ním dostali nuly. Ak v ståpci pivot nenájdeme, buï matica nie je regulárna
 			a teda inverzia neexistuje, alebo je štruktúra matice taká, e jednoduchou Gaussovou elimináciou nie sme schopní inverziu nájs. Je dôleité zdôrazni, e
-			èi inverzia existuje alebo nie, nie sme schopní z vısledku algoritmu urèi. Ak inverzia neexistuje, algoritmus je neúspešní, ale môe nasta prípad keï
+			èi inverzia existuje alebo nie, nie sme schopní z vısledku algoritmu urèi. Ak inverzia neexistuje, algoritmus je neúspešnı, ale môe nasta prípad keï
 			inverzia existuje ale napriek tomu algoritmus inverziu nevypoèíta.
 			
+		\noindent
+			V tabu¾ke XX sú vısledky meraní èasovej zloitosti a úspešnosti invertovania pre rôzne ve¾kosti matíc
 
 			
 	\subsubsection{Generovanie matice G}
@@ -167,8 +163,8 @@
 				\end{algorithmic}
 			\end{algorithm}
 			
-			Ak súèet R+T nie je regulárna matica, skúsime vygenerova T znova.
+			Ak súèet R+T nie je regulárna matica, skúsime vygenerova T znova.		
+
 			
 			
-			
-	
+		

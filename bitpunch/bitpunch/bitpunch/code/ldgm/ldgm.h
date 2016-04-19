@@ -29,37 +29,13 @@
 
 #include <bitpunch/crypto/hash/sha512.h>
 
-/**
- * McEliece QC-MDPC encode
- * @param  out         	cipher text
- * @param  in     	   	message
- * @param  ctx 			QC-MDPC McEliece context
- * @return             	0 if OK, else error
- */
 int BPU_ldgmEncode(BPU_T_GF2_Vector *out, BPU_T_GF2_Vector *in, const struct _BPU_T_Code_Ctx *ctx);
 
-/**
- * McEliece QC-MDPC decrypt
- * @param  out         	message
- * @param  in     	   	cipher text
- * @param  ctx 			QC-MDPC McEliece context
- * @return              0 if OK, else error
- */
 int BPU_ldgmDecode(BPU_T_GF2_Vector *out, BPU_T_GF2_Vector *in, const struct _BPU_T_Code_Ctx *ctx);
 
 void BPU_ldgmAddCodeWord(BPU_T_GF2_Vector *out, BPU_T_GF2_Vector *in, const struct _BPU_T_Code_Ctx *ctx);
 
-#ifdef BPU_CONF_KEY_GEN
-/**
- * Generate key pair of QC-MDPC code for McEliece cryptosystem.
- * Generator matrix G is not sparse. Its public key.
- * Parity-check matrix H is in sparse form. Its private key.
- * Params of code are set as global constants in crypto.h header file.
- * @param ctx 		QC-MDPC McEliece context
- * @return          0 if OK, else error
- */
-int BPU_ldgmGenKeys(BPU_T_Code_Ctx *ctx);
-#endif
+int BPU_ldgmGenKeys(BPU_T_Code_Ctx *ctx, BPU_T_LDGM_Params *params);
 
 int BPU_ldgmGenerateGenMatrix(BPU_T_LDGM_Params *params, BPU_T_GF2_QC_Matrix *g_mat);
 
