@@ -1,170 +1,340 @@
-\subsection{Návrh implementácie pre LDGM}
+\noindent
+	V tejto èasti uvedieme návrh a implementáciu LDGM podpisovej schémy spolu s konkrétnymi algoritmami
+	na generovanie k¾úèov, podpisov a overovacie funkcie.
+
+\subsection{Parametre}
 	\noindent
-		V tejto èasti navrhneme implementáciu LDGM podpisovej schémy a predstavíme konkrétne algoritmy
-		na generovanie k¾úèov, podpisov a overovacie funkcie. 
-	
-	\subsubsection{Funkcia $\phi$}
-		\noindent
-			Dôleitou súèasou pre celú implementáciu, je zvoli funkciu $\phi$, ktorá jednoznaène mapuje vektor dåky $n$ 
-			na vektor dåky $l$ s váhou $t$. Pre tento úèel zvolíme algoritmus, ktorı navrhol Sendrier v rámci CFS schémy v [xx]. Tento algoritmus má lineárnu zloitos a
-			oproti algoritmu, ktorı pouili autori LDGM schémy ponúka vırazné zrıchlenie celého vıpoètu.
-			
-			Implementácia ako ju navrhol Sendrier je uvedená v algoritme XX.
-			
-			\begin{algorithm}[ht]
-				\caption{Funkcia $\phi$}
-				\label{phi-function}
-				\begin{algorithmic}
-					\INPUT Vektor dåky $n$, parameter $t$
-					\OUTPUT Vektor dåky $l$ s váhou $t$
+		Nasledujúca tabu¾ka obsahuje všetky volite¾né parametre a funkcie pre celú podpisovú schému LDGM spolu s odporúèanımi hodnotami na dosiahnutie
+		80 bitovej bezpeènosti
 
-				\end{algorithmic}
-			\end{algorithm}
-			
-	\subsubsection{Funkcia $\psi$}
-	
-	\subsubsection{Generovanie k¾úèov}
-		\noindent
-			Generovanie páru k¾úèov sa skladá z viacerıch krokov
-			
-			\begin{description}
-				\item[$\bullet$] Vygenerova generujúcu maticu $G$
-				\item[$\bullet$] Vygenerova maticu $Q$
-				\item[$\bullet$] Vygenerova maticu $S$
-				\item[$\bullet$] Vypoèíta maticu $H_{pub}$
-			\end{description}
-			
-			Pseudokód generovania k¾úèov je zhrnutı v algoritme XX
-			
-			\begin{algorithm}[h]
-				\caption{Generovanie k¾úèov}
-				\label{key-gen}
-				\begin{algorithmic}
-					\INPUT Parametre kódu a schémy - $params$
-					\OUTPUT Pár k¾úèov
-			
-			
-					\State $G \gets generateGenMatrix(params)$
-					
-					\Repeat
-						\State $Q \gets generateMatrixQ(params)$
-						\State $Q_{inv} \gets tryToInvert(Q)$
-					\Until{$exists(Q_{inv})$}
-					
-										
-					\Repeat
-						\State $S \gets generateMatrixS(params)$
-						\State $S_{inv} \gets tryToInvert(S)$
-					\Until{$exists(S_{inv})$}
-					
-					\State
-					\State $H_{pub} \gets buildMatrixH(G, Q_{inv}, S_{inv})$	
-					\State $PublicKey \gets H_{pub}$
-					\State $PrivateKey \gets G, Q_{inv}, S_{inv}$
-					
-					\State \Return $PrivateKey$, $PublicKey$
+		\begin{table}[h]
+		\centering
+		\caption{Parametre a funkcie LDGM}
+		\label{Parametre a funkcie LDGM}
+			\begin{tabular}{lll}
+			\textbf{Parameter} & \textbf{Popis}       & \textbf{80 bit SL}                                              \\
+			$n$                  & dåka kódu ($n_0p$) &     9800                                               \\
+			$k$                  & dimenzia kódu ($k_0p$)    &   4900                                          \\
+			$p$                  & ve¾kos cirkulantnıch matíc        &      50                           \\
+			$z$                  & poèet riadkov matice $a$,$b$  pozn. ($z \leq (n-k)$)      &     2               \\
+			$w_g$               & váha riadku generujúcej matice $G$    &       20                              \\
+			$w_t$               & váha riadku/ståpca matice $T$           &      1                        \\
+			$w_s$               & váha riadku/ståpca matice $S$     &                 9                   \\
+			$w_c$              & váha slova $c$, ktoré urèuje funkcia $\psi$      &      160                  \\
+			$H$                & hashovacia funkcia    &   -   \\
+			$\psi$                & funkcia, ktorá jednoznaène priradí správe $m$ kódové slovo $c$   &   -    \\
+			$\phi$                & funkcia, ktorá zobrazuje slová dåky $x$ na vektory dåky $y$ s váhou $z$ & -
+			\end{tabular}
+		\end{table}
 
-					
-				\end{algorithmic}
-			\end{algorithm}
-	
+\subsection{Funkcia $\phi$}
+	\noindent
+		Dôleitou súèasou pre celú implementáciu, je zvoli funkciu $\phi$, ktorá jednoznaène mapuje vektor dåky $n$
+		na vektor dåky $l$ s váhou $t$. Pre tento úèel zvolíme algoritmus, ktorı navrhol Sendrier v rámci CFS schémy v [xx]. Tento algoritmus má lineárnu zloitos a
+		oproti algoritmu, ktorı pouili autori LDGM schémy ponúka vırazné zrıchlenie celého vıpoètu.
+
+		Implementácia ako ju navrhol Sendrier je uvedená v algoritme \ref{phi-function}.
+
+		\begin{algorithm}[!ht]
+			\caption{Funkcia $\phi$}
+			\label{phi-function}
+			\begin{algorithmic}
+				\INPUT Dåka slova - $n$, váha slova - $t$, prúd bitov - $B$
+				\OUTPUT Vektor dåky $n$ s váhou $t$
 				
-			Kadı krok generovania rozoberieme v osobitnej èasti. 
-			Pod¾a návrhu schémy potrebujeme inverzné matice $Q^{-1}$ a $S^{-1}$, take matice $Q$ a $S$ musia by regulárne.
-			Pseudokód v algoritme XX ukazuje, e sme na generovanie matíc $Q$ a $S$ zvolili stratégiu generuj a testuj a teda
-			ak sa nám nepodarí vygenerovnú maticu invertova, generovanie opakujeme. 
-			
-			\noindent
-			Invertovanie kvazicyklickıch matíc zohráva pri generovaní k¾úèov podstatnú úlohu. Preto predtım ako si priblíime 
-			algoritmy na generovanie matíc $Q$ a $S$, sa budeme venova invertovaniu kvázicyklickıch matíc.
-	
-	\subsubsection{Invertovanie QC matice}
+				\State $t_{tuple} \gets$ \Call{BtoCW}{$n$, $t$, $0$, $B$}
+				\State \Return $convertTupleToVector(t_{tuple})$
+				\State
+				
+				
+				\Function{BtoCW}{$n$, $t$, $\delta$, $B$}
+					\If{$t = 0$}
+						\State \Return
+					\ElsIf{$n \leq t$}
+						\State \Return $\delta$, \Call{BtoCW}{$n-1$, $t-1$, $0$, $B$}
+					\Else
+						\State $d \gets (n - \frac{t-1}{2})(1-\frac{1}{2^{1/t}})$
+						\If{read(B, 1) = 1}
+							\State \Return \Call{BtoCW}{$n-d$, $t$, $\delta+d$, $B$}
+						\Else 
+							\State $i \gets \Call{DecodeFD}{d, B}$
+							\State \Return $\delta + i$, \Call{BtoCW}{$n-i-1$, $t-1$, $0$, $B$}
+						\EndIf
+					\EndIf
+				\EndFunction
+				\\
+				\Function{DecodeFD}{$d$, $B$}
+					\State $u \gets \lceil \log_2(d)\rceil$
+					\State $\delta \gets read(B, u-1)$
+					\If{$\delta \geq 2^u-d$}
+						\State $\delta \gets 2\delta + read(B, 1)-2^u+d$
+					\EndIf
+				\EndFunction
+				
+				\\
+				Pozn. $read(n, B)$ je funkcia, ktorá preèíta $n$ bitov z prúdu v desiatkovej reprezentácii a posunie prúd
+				o $n$ bitov. 
+
+			\end{algorithmic}
+		\end{algorithm}
+
+\subsection{Funkcia $\psi$}
+	\noindent
+		Na zamaskovanie chybového slova, ktoré tvorí podstatu podpisu a má špecifickı tvar $[0k | s]$ (viï algoritmus \ref{signature-LDGM}), k nemu pripoèítame kódové
+		slovo, ktoré sa odvodí v závislosti od správy. Toto slovo musí ma váhu nišiu alebo rovnú ako predpísanı parameter schémy $w_c$. Existuje
+		ve¾a spôsobov ako takéto slovo urèi a v algoritme \ref{psi-function} je uvedenı postup, ktorı pouívame v našej implementácii.
+		Generujúca matica $G$ je špeciálne vytvorená aby kadı riadok mal vopred urèenú váhu $w_g$ a kede je to náhodná matica s nízkou váhou, je malá pravdepodobnos,
+		e jednotky v riadkoch sú na rovnakıch pozíciách. Preto na urèenie slova s váhou menšou alebo rovnou $w_c$ staèí spoèíta $w_c/w_g$ riadkov z matice $G$.
+
+		\begin{algorithm}[ht]
+			\caption{Funkcia $\psi$}
+			\label{psi-function}
+			\begin{algorithmic}
+				\INPUT Správa $m$, váha vısledného slova $w_c$
+				\OUTPUT Kódové slovo s váhou  $\leq w_c$
+
+				\State $b \gets \log_2(k)$
+				\State $count \gets w_c/w_g$
+				\State $h \gets H(m)$
+				\State $c \gets 0_n$
+
+				\For{$i \gets 0$  \To $count$}
+					\State $index_{row} \gets binToDec(h[(i*b):(i+1)*b])$
+					\State $c \gets c \oplus G[index_{row}]$
+				\EndFor
+
+				\State \Return $c$
+
+				\noindent Pozn. $G$ - generujúca matica, $k$ - poèet riadkov $G$, $n$ - dåka $G$, $H$ - hash. funkcia
+			\end{algorithmic}
+		\end{algorithm}
+
+\subsection{Generovanie k¾úèov}
+	\noindent
+		Generovanie páru k¾úèov sa skladá z viacerıch krokov
+
+		\begin{description}
+			\item[$\bullet$] Vygenerova generujúcu maticu $G$
+			\item[$\bullet$] Vygenerova maticu $Q$
+			\item[$\bullet$] Vygenerova maticu $S$
+			\item[$\bullet$] Vypoèíta maticu $H_{pub}$
+		\end{description}
+
+	\noindent
+		Pseudokód generovania k¾úèov je zhrnutı v algoritme \ref{key-gen}
+
+		\begin{algorithm}[h]
+			\caption{Generovanie k¾úèov}
+			\label{key-gen}
+			\begin{algorithmic}
+				\INPUT Parametre kódu a schémy - $params$
+				\OUTPUT Pár k¾úèov
+
+
+				\State $G \gets generateGenMatrix(params)$
+
+				\Repeat
+					\State $Q \gets generateMatrixQ(params)$
+					\State $Q_{inv} \gets tryToInvert(Q)$
+				\Until{$exists(Q_{inv})$}
+
+
+				\Repeat
+					\State $S \gets generateMatrixS(params)$
+					\State $S_{inv} \gets tryToInvert(S)$
+				\Until{$exists(S_{inv})$}
+
+				\State
+				\State $H_{pub} \gets buildMatrixH(G, Q_{inv}, S_{inv})$
+				\State $PublicKey \gets H_{pub}$
+				\State $PrivateKey \gets G, Q_{inv}, S_{inv}$
+
+				\State \Return $PrivateKey$, $PublicKey$
+
+
+			\end{algorithmic}
+		\end{algorithm}
+
 		\noindent
-			Binárne cirkulantné matice ve¾kosti $n$ môu by reprezentované polynómom $P(x)$ z $GF(2)/x^n-1$. 
-			$P(x)$ je stupòa maximálne $n-1$ a reprezentuje prvı riadok cirkulantnej matice, $i$-ty riadok matice je reprezentovanı
-			polynómom $x^{i-1}P(x)$ pre $i \in {1, ..., n}$.
-			
-		\noindent 
-			Kvázicyklická matica je matica, ktorej všetky prvky sú polynómy z $GF(2)/x^n-1$. Kadı polynóm predstavuje jeden cirkulantnı
-			blok. Pre kvázicyklickú maticu môeme riadkovo ekvivalentné operácie rozšíri o operácie, ktoré pracujú nad blokmi. To znamená,
-			e na poèítanie inverznej matice môeme poui Gaussovu eliminaènú metódu nad okruhom polynómov. Kvázicyklickú maticu $M$ ve¾kosti $n$ rozšírime
-			zprava o jednotkovú maticu (tie v QC tvare). Rošírenú maticu upravíme do redukovaného stupòovitého tvaru. Maticu $M^{-1}$ potom tvoria
-			ståpce $<n+1, 2n>$.
-			
-				\begin{algorithm}[h]
-				\caption{Invertovanie QC matice}
-				\label{inv-qc}
-				\begin{algorithmic}
-					\INPUT QC matica $M$
-					\OUTPUT QC matica $M^{-1}$ ak existuje, inak 0
-					
-					\State $M_{eye} \gets [M | I]$
-					
-					\For{$i \gets 1$ \To $n$}
-						\For{$j \gets i$ \To $n$}
-							\If{$existsPolynomialInverse(M_{eye}[j][i])$}
-								\State $inverse \gets polynomialInverse(M_{eye}[j][i])$
-								\State $swap(M_{eye}[i], M_{eye}[j])$
-								\State $M_{eye}[i] \gets M_{eye}[i] * inverse$
-								\Break
-							\EndIf
-						\EndFor
-				
-						\If{$exists(inverse)$}
-							\For{$j \gets 1$ \To $n$}
-								\If{$j=i$}
-									\Continue
-								\EndIf
-								\State $M_{eye}[j] \gets M_{eye}[j] + M_{eye}[i]*M_{eye}[j][i]$
-							\EndFor
-						\Else
-							\State \Return 0
+		Kadı krok generovania rozoberieme v osobitnej èasti.
+		Pod¾a návrhu schémy potrebujeme inverzné matice $Q^{-1}$ a $S^{-1}$, take matice $Q$ a $S$ musia by regulárne.
+		Pseudokód v algoritme \ref{key-gen} ukazuje, e sme na generovanie matíc $Q$ a $S$ zvolili stratégiu generuj a testuj a teda
+		ak sa nám nepodarí vygenerovnú maticu invertova, generovanie opakujeme.
+
+		\noindent
+		Invertovanie kvazicyklickıch matíc zohráva pri generovaní k¾úèov podstatnú úlohu. Preto predtım ako si priblíime
+		algoritmy na generovanie matíc $Q$ a $S$, sa budeme venova invertovaniu kvázicyklickıch matíc.
+
+\subsection{Invertovanie QC matice}
+	\noindent
+		Binárne cirkulantné matice ve¾kosti $n$ môu by reprezentované polynómom $p(x) \in GF(2)[x]/(x^n-1)$.
+		$p(x)$ je stupòa maximálne $n-1$ a reprezentuje prvı riadok cirkulantnej matice, $i$-ty riadok matice je reprezentovanı
+		polynómom $x^{i-1}p(x)$ pre $i \in {1, ..., n}$.
+
+	\noindent
+		Kvázicyklická matica je matica, ktorej všetky prvky sú polynómy z $GF(2)[x]/(x^n-1)$. Kadı polynóm predstavuje jeden cirkulantnı
+		blok. Pre kvázicyklickú maticu môeme riadkovo ekvivalentné operácie rozšíri o operácie, ktoré pracujú nad blokmi. To znamená,
+		e na poèítanie inverznej matice môeme poui Gaussovu eliminaènú metódu nad okruhom polynómov. Kvázicyklickú maticu $M$ ve¾kosti $n$ rozšírime
+		zprava o jednotkovú maticu (tie v QC tvare). Rošírenú maticu upravíme do redukovaného stupòovitého tvaru. Maticu $M^{-1}$ potom tvoria
+		ståpce $[n+1, 2n]$.
+
+		\begin{center}
+		$
+			\left[
+			\begin{array}{ccc|cccc}
+				p_{1,1}(x) &  \cdots & p_{1,n}(x)  & 1 		& 0 	 & \cdots & 0		\\  
+				p_{2,1}(x) &  \cdots & p_{2,n}(x)  & 0 		& 0 	 & \cdots & 0		\\ 
+				\vdots	   &  \ddots & \vdots	   & \vdots & \vdots & \ddots & \vdots 	\\
+				p_{n,1}(x) &  \cdots & p_{n,n}(x)  & 0 		& 0 	 & \cdots & 1
+			\end{array}
+			\right]
+			$  \: $\longrightarrow$ \:	$
+			\left[
+			\begin{array}{cccc|ccc}
+				1 	   & 0 		& \cdots & 0 	  & p_{1,1}'(x) &  \cdots & p_{1,n}'(x)   \\  
+				0 	   & 0 		& \cdots & 0	  & p_{2,1}'(x) &  \cdots & p_{2,n}'(x)   \\ 
+				\vdots & \vdots & \ddots & \vdots & \vdots	   	&  \ddots & \vdots	      \\
+				0	   & 0 		& \cdots & 1 	  & p_{n,1}'(x) &  \cdots & p_{n,n}'(x)  
+			\end{array}
+			\right]$
+		\end{center}
+
+
+			\begin{algorithm}[!ht]
+			\caption{Invertovanie QC matice}
+			\label{inv-qc}
+			\begin{algorithmic}
+				\INPUT QC matica $M$
+				\OUTPUT QC matica $M^{-1}$ ak existuje, inak 0
+
+				\State $M_{eye} \gets [M | I]$
+
+				\For{$i \gets 1$ \To $n$}
+					\For{$j \gets i$ \To $n$}
+						\If{$existsPolynomialInverse(M_{eye}[j][i])$}
+							\State $inverse \gets polynomialInverse(M_{eye}[j][i])$
+							\State $swap(M_{eye}[i], M_{eye}[j])$
+							\State $M_{eye}[i] \gets M_{eye}[i] * inverse$
+							\Break
 						\EndIf
 					\EndFor
-					
-					\State \Return $M_{eye}[1:n][n+1:2n]$
-					
-				\end{algorithmic}
-			\end{algorithm}
 
-					
-		\noindent
-			Na to aby sme pomocou jedného riadku mohli eliminova ostatné, potrebujeme nájs vedúci prvok (pivot). V polynomickej reprezentácii to znamená nájs
-			v ståpci prvok, ktorı sa dá invertova modulo $x^n-1$. Inverziu h¾adáme pomocou Euklidovho rozšíreného algoritmu. Ak nájdeme pivot, pripoèítame k ostatnım 
-			riadkom takı násobok riadku, ktorı obsahuje pivot, aby sme v ståpci nad aj pod ním dostali nuly. Ak v ståpci pivot nenájdeme, buï matica nie je regulárna
-			a teda inverzia neexistuje, alebo je štruktúra matice taká, e jednoduchou Gaussovou elimináciou nie sme schopní inverziu nájs. Je dôleité zdôrazni, e
-			èi inverzia existuje alebo nie, nie sme schopní z vısledku algoritmu urèi. Ak inverzia neexistuje, algoritmus je neúspešnı, ale môe nasta prípad keï
-			inverzia existuje ale napriek tomu algoritmus inverziu nevypoèíta.
-			
-		\noindent
-			V tabu¾ke XX sú vısledky meraní èasovej zloitosti a úspešnosti invertovania pre rôzne ve¾kosti matíc
+					\If{$exists(inverse)$}
+						\For{$j \gets 1$ \To $n$}
+							\If{$j=i$}
+								\Continue
+							\EndIf
+							\State $M_{eye}[j] \gets M_{eye}[j] + M_{eye}[i]*M_{eye}[j][i]$
+						\EndFor
+					\Else
+						\State \Return 0
+					\EndIf
+				\EndFor
 
-			
-	\subsubsection{Generovanie matice G}
-	
-	\subsubsection{Generovanie matice Q}
-		\noindent
-			Ako bolo uvedené v predošlej èasti, matica $Q$ sa skladá z matíc $R$ a $T$, ktoré su blokovo cirkulantné. 
-			Matica $R$ vznikne ako produkt $a^{T}b \otimes 1_{p,p}$, matice $a$, $b$ náhodne vygenerujeme v závislosti od parametra $z$.
-			Matica $T$ sa skladá z cirkulantnıch matíc s rozmerom $p \times p$. A váha kadého riadku a ståpca je $w_t$, nepárne.
-			Uvedieme si algoritmus na generovanie matice $T$.
-			\begin{algorithm}[h]
-				\caption{Generovanie regulárnej matice z cirkulantnıch blokov}
-				\label{gen-mat-reg}
-				\begin{algorithmic}
-					\INPUT Poèet cirkulantnıch blokov - $r_0$, ve¾kos bloku - $p$, predpísaná váha $w_t$
-					\OUTPUT Regulárna matica z cirkulatnıch blokov s predpísanou váhou riadkov a ståpcov
-					
-					\State Vytvorime riadok z blokov tak, aby prvy blok bol jednotkova matica, zvysok su bloky
-							s parnou vahou
-					\State Ostatne riadky vytvorime posuvanim blokov z prveho "riadku" 
-					\State Dostaneme na diagonale jednotkove matice, zvysok matice s parnym poctom jednotiek
-					\State Premiesame blokovo riadky a stlpce
-				\end{algorithmic}
-			\end{algorithm}
-			
-			Ak súèet R+T nie je regulárna matica, skúsime vygenerova T znova.		
+				\State \Return $M_{eye}[1:n][n+1:2n]$
 
-			
-			
+			\end{algorithmic}
+		\end{algorithm}
+
+
+	\noindent
+		Na to aby sme pomocou jedného riadku mohli eliminova ostatné, potrebujeme nájs vedúci prvok (pivot). V polynomickej reprezentácii to znamená nájs
+		v ståpci prvok, ktorı sa dá invertova modulo $x^n-1$. Inverziu h¾adáme pomocou Euklidovho rozšíreného algoritmu. Ak nájdeme pivot, pripoèítame k ostatnım
+		riadkom takı násobok riadku, ktorı obsahuje pivot, aby sme v ståpci nad aj pod ním dostali nuly. Ak v ståpci pivot nenájdeme, buï matica nie je regulárna
+		a teda inverzia neexistuje, alebo je štruktúra matice taká, e jednoduchou Gaussovou elimináciou nie sme schopní inverziu nájs. Je dôleité zdôrazni, e
+		e nie sme schopní z vısledku algoritmu urèi èi inverzia existuje alebo nie. Ak inverzia neexistuje, algoritmus je neúspešnı, ale môe nasta prípad keï
+		inverzia existuje ale napriek tomu algoritmus inverziu nevypoèíta.
+	\noindent
+		Úspešnos algoritmu do ve¾kej miery súvisí od ve¾kosti cirkulatnıch blokov. Èím viac faktorov má polynóm $x^n-1$, tım je väèšia šanca, e náhodnı polynóm s ním
+		bude súdelite¾nı a teda k nemu neexistuje inverznı prvok. Ak je malá šanca nájs inverznı prvok, zniuje to celkovú šancu na úspech Gaussovej eliminácie,
+		pretoe nevieme nájs pivot.
+	\noindent
+		Predchádzajúce tvrdenie sa potvrduje aj vo vısledkoch meraní, ktoré sú uvedené v samostatnej kapitole. Napríklad pri ve¾kosti bloku 21 poèítame s polynómom $x^{21}-1$. Tento
+		polynóm má rozklad nad $GF(2)$ $(x + 1)(x^2 + x + 1)(x^3 + x + 1)(x^3 + x^2 + 1)(x^6 + x^4 + x^2 + x + 1)(x^6 + x^5 + x^4 + x^2 + 1)$. Polynóm $x^{19}-1$ má rozklad
+		$(x + 1)(x^{18} + x^{17} + x^{16} + x^{15} + x^{14} + x^{13} + x^{12} + x^{11} + x^{10} + x^9 + x^8 + x^7 + x^6 + x^5 + x^4 + x^3 + x^2 + x + 1)$. Invertovanie by teda malo by vırazne
+		úspešnejšie pri velkosti bloku $19$ ako pri ve¾kosti $21$, èo aj potvrdzujú merania.
+
+
+\pagebreak
+\subsection{Generovanie matice $G$}
+	\noindent
+		Generovanie náhodnej matice $G$ je pomerne priamoèiare. $G$ je kvázicyklcká matica tvaru $[I | X]$ kde matica $X$ je náhodná matica, v ktorej kadı riadok má rovnakú váhu. 
+		Parametre ktoré vstupujú do generovania sú poèet blokov v riadku $n$, poèet blokov v ståpci $k$, ve¾kos bloku $p$ a váha riadku $w_g$. Pseudokód generovania je uvedenı v
+		algoritme \ref{gen-g-mat}
 		
+		\begin{algorithm}[!h]
+			\caption{Generovanie matice $G$}
+			\label{gen-g-mat}
+			\begin{algorithmic}
+				\INPUT Poèet blokov v riadku - $n$, poèet blokov v ståpci - $k$, ve¾kos bloku - $p$, váha riadku $w_g$
+				\OUTPUT Generujúca matica G
+				\State $X \gets 0_{k, n-k}$
+				\For{$i \gets 1$ \To $k$} 
+					\State $w \gets w_g - 1$
+					\While{$w > 0$}
+						\State $p(x) \gets X[i][rand(n)]$
+						\If{$wt(p(x))) < p$}
+							\State $addRandBit(p(x))$
+							\State $w \gets w-1$
+						\EndIf
+					\EndWhile
+				\EndFor
+				\State $G \gets [I | X]$
+				\State \Return $G$
+				
+				\noindent Pozn. $rand(n)$ vráti celé èíslo z rozsahu $[1, n]$, $addRandBit(p(x))$ pridá jednotku na náhodnú pozíciu v polynóme $p(x)$
+			\end{algorithmic}
+		\end{algorithm}
+		
+\subsection{Generovanie matice $Q$}
+	\noindent
+		Matica $Q$ sa skladá z matíc $R$ a $T$, ktoré su blokovo cirkulantné.
+		Matica $R$ vznikne ako Kroneckerov súèin $a^{T}b \otimes 1_{p,p}$. Matice $a$, $b$ náhodne vygenerujeme v závislosti od parametra $z$.
+		Matica $T$ sa skladá z cirkulantnıch matíc s rozmerom $p \times p$. A váha kadého riadku a ståpca je $w_t$, nepárne. Generovanie kvazicyklickıch
+		matíc s pevnou váhou ståpcov a riadkov je popísane v algoritme \ref{gen-const-qc}. 
+		\begin{algorithm}[!h]
+			\caption{Generovanie QC matice s pevnou váhou}
+			\label{gen-const-qc}
+			\begin{algorithmic}
+				\INPUT Poèet cirkulantnıch blokov - $n$, ve¾kos bloku - $p$, predpísaná váha $w_t$
+				\OUTPUT Kvázicyklická matica s predpísanou váhou riadkov a ståpcov
+
+				\State $blocks \gets 0_{n}$
+				\State $i \gets w_t$
+				\If{$odd(w_t)$}
+					\State $blocks[1] \gets 1$
+					\State $i \gets i-1$
+				\EndIf
+				
+				\While{$i > 0$}
+					\State $r \gets rand(n)$
+					\If{$blocks[r] \leq n-2$}
+						\State $blocks[r] \gets blocks[r] + 2$
+						\State $i \gets i-2$
+					\EndIf
+				\EndWhile
+				
+				\State $T \gets 0_{n, n}$
+				
+				\For{$i \gets 1$ \To $n$}
+					\For{$j \gets 1$ \To $n$}
+						\State $T[i][j] \gets randPolyOfWeight(blocks[(i + j) \mod n])$
+					\EndFor
+				\EndFor
+				
+				\State $X \gets permuteRowBlocks(X)$
+				\State $X \gets permuteColumnBlocks(X)$
+				
+				\State \Return $X$
+			\end{algorithmic}
+		\end{algorithm}
+
+\subsection{Generovanie matice $S$}
+	\noindent
+		$S$ je náhodná kvázicyklická matica s pevnou váhou riadkov a ståpcov. Na jej generovanie môeme poui algoritmus \ref{gen-const-qc}, ktorı
+		sme pouili pri generovaní matice $Q$
+
+\subsection{Vıpoèet matice $H_{pub}$}
+	\noindent
+		Predtım, ako sa pustíme do vıpoètu matice $H_{pub}$, potrebjeme inverzné matice ku $Q$ a $S$. Ak nevieme k niektorej z matíc nájs inverziu, opakujeme
+		generovanie a skúsime nájs inverziu znova. Ak sa nám úspešne podarí nájs inverziu k obom maticiam, maticu $H_{pub}$ vypoèítame ako súèin matíc $Q^{-1}HS^{-1}$.
