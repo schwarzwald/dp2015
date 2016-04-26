@@ -338,3 +338,38 @@
 	\noindent
 		Predtım, ako sa pustíme do vıpoètu matice $H_{pub}$, potrebjeme inverzné matice ku $Q$ a $S$. Ak nevieme k niektorej z matíc nájs inverziu, opakujeme
 		generovanie a skúsime nájs inverziu znova. Ak sa nám úspešne podarí nájs inverziu k obom maticiam, maticu $H_{pub}$ vypoèítame ako súèin matíc $Q^{-1}HS^{-1}$.
+
+\subsection{Implementácia v BitPunch}
+	\noindent
+		BitPunch je opensource kryptografická kninica napísaná v jazyku C, ktorú postupne vyvíjajú študenti FEI STU. Primárne zameranie kninice je na postkvantovú kryptografiu
+		zaloenej na dekódovacom probléme. Táto práca rozširuje funkènos o digitálne podpisy, konkrétne o LDGM schému.
+		BitPunch obsahoval jednoduchú implementáciu kvázicyklickıch matíc, ktoré sa pouívali pri QC-MDPC implementácii McEliecovho kryptosystému. Táto implementácia však bola
+		prispôsobená špeciálne pre potreby QC-MDPC schémy a musela by rozšírená pre všeobecné pouitie. Do kninice bolo pridanıch ve¾a procedúr, ktoré pracujú s kvázicyklickımi 
+		maticami, vektormi a polynómami nad $GF(2)$.
+	\noindent
+		Spôsob akım sú digitálne podpisy integrované do BitPunch kninice je naèrtnutı na diagrame. 
+		
+		\begin{figure}[!ht]
+			\label{fig:bp-diagram}
+			\caption{Diagram štruktúr v BitPunch}
+			\centering
+			\includegraphics[width=1\textwidth]{images/bp.png}
+		\end{figure}
+	
+	\noindent
+		$SignatureContext$ slúi ako premenná prostredia, ktorá obsahuje špecifikáciu kódu
+		a parametre pre podpisovú schému. Štruktúra $CodeSpec$ je implementovaná ako union. Tento spôsob pouívania union dátového typu má simulova návrhovı vzor $Strategy$, ktorı však
+		nie je moné kvalitne implementova v jazyku C, pretoe C nie je objektovo orientovanı jazyk.
+		
+		\begin{figure}[!ht]
+			\label{fig:bp-diagram}
+			\caption{Organizaèná štruktúra v BitPunch}
+			\centering
+			\includegraphics[width=0.36\textwidth]{images/bp_project.png}
+		\end{figure}
+		
+	\noindent
+		Na obrázku s organizaènou štruktúrou projektu BitPunch sú vyznaèené èasti, ktoré pribudli ako súèas tejto práce.
+		
+	\noindent
+		Kompletné zdrojové kódy k implementácii sa nachádzajú v prílohe.
