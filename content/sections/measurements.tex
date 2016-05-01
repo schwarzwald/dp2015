@@ -1,1 +1,183 @@
-merania
+\noindent
+	BitPunch s LDGM podpismi sme testovali na zostave Intel Core2 Quad Q8200 @ 2.33GHz, 4GB RAM s operaènım systémom Windows 10. 
+	Kninica bola pri testovaní kompilovaná s GCC kompilátorom s O3 optimalizáciou. V rámci testovania sme testovali úspešnos a èasovú
+	zloitos invertovania kvázicyklickıch matíc, vıkonnos ivotného cyklu LDGM podpisovej schémy, èo znamená generovanie k¾úèov, podpisovanie náhodnej správy
+	a overenie podpisu. Vısledky sme porovnali s vıkonnosou digitálneho podpisu implementovaného v OpenSSL.
+
+\subsection{Invertovanie QC matíc}
+	\noindent
+		Vstupné parametre testovania invertovania QC matíc boli poèet cirkulatnıch blokov a ve¾kos bloku. Vıstupom testu bola úspešnos invertovania
+		zo 100 pokusov a priemernı èas vıpoètu.
+
+	\noindent
+		Parameter poètu blokov sme testovali s hodnotami 5, 7, 9, ..., 71 a ve¾kos bloku od 4 po 53.
+		Èas vıpoètu inverznej matice je kvadraticky závislı od poètu blokov a lineárne od ve¾kosti bloku. Toto tvrdenie vyplıva z
+		návrhu algoritmu a potvrdzujú ho aj vısledky testovania.
+	
+	\begin{figure}[!ht]
+		\label{fig:blocksize_time}
+		\caption{Graf závislosti vıpoètového èasu od ve¾kosti cirkulatnıch blokov}
+		\centering
+		\includegraphics[width=1\textwidth]{images/blocksize_time2.png}
+	\end{figure}
+
+	\noindent
+		Na grafe sú zobrazené èasové závislosti od ve¾kosti blokov pre rôzne ve¾ké matice. Pod krivkami sú naznaèené regresné priamky.
+			
+	\begin{figure}[!ht]
+		\label{fig:size_time}
+		\caption{Graf závislosti vıpoètového èasu od poètu blokov v matici}
+		\centering
+		\includegraphics[width=1\textwidth]{images/size_time2.png}
+	\end{figure}
+	
+	\noindent
+		Predchádzajúci graf zobrazuje èasové závislosti od poètu blokov pre rôzne ve¾kosti cirkulantnıch blokov. Pod krivkami sú naznaèené kvadratické regresné krivky.
+		
+	\begin{figure}[!ht]
+		\label{fig:size_surface}
+		\caption{Graf závislosti vıpoètového èasu od poètu blokov a ve¾kosti blokov}
+		\centering
+		\includegraphics[width=1\textwidth]{images/surface.png}
+	\end{figure}
+	
+	\noindent	
+		V tabu¾ke \ref{results-time} sú uvedené hodnoty pre vybrané parametre testovania, kompletné vısledky sú uvedené v prílohe.
+		
+	\begin{table}[!ht]
+		\centering
+		\caption{Vısledky èasovej zloitosti invertovania QC matíc}
+		\label{results-time}
+		\begin{tabular}{l|l|l}
+			\textbf{Poèet blokov} & \textbf{Ve¾kos bloku} & \textbf{Priemernı èas (s)} \\ \hline
+			5 					  & 4                      & 0.0003				    \\ \hline                                                       
+			9 					  & 19                     & 0.0022				    \\ \hline                                                       
+			13 					  & 31                     & 0.0065				    \\ \hline                                                       
+			21					  & 41                     & 0.0234				    \\ \hline                                                       
+			31					  & 49                     & 0.0721				    \\ \hline                                                       
+			41					  & 52                     & 0.1543				    \\ \hline                                                       
+			51					  & 53                     & 0.2860				    \\ \hline                                                       
+			63					  & 53                     & 0.5195				    \\ \hline                                                       
+		\end{tabular}
+	\end{table}		
+	
+	\pagebreak
+	\noindent
+		Z vısledkov testovania nevyplıva, e úspešnos invertovania závisí od poètu blokov v matici. 
+		
+	\begin{figure}[!ht]
+		\label{fig:size_success}
+		\caption{Graf závislosti úspešnosti od poètu blokov}
+		\centering
+		\includegraphics[width=1\textwidth]{images/size_success2.png}
+	\end{figure}
+	\pagebreak
+	\noindent
+		Ako bolo uvedené v èasti, ktorá sa venovala implementácii, úspešnos nezavisí priamo od ve¾kosti a poètu blokov ale
+		od poètu faktorov polynómu $x^n-1$.
+	
+	\begin{table}[!h]
+		\centering
+		\caption{Vısledky pre najúspešnejšie ve¾kosti blokov}
+		\label{best-success}
+		\begin{tabular}{l|l|l}
+			\textbf{Ve¾kos bloku} & \textbf{Úspešnos (s)} \\ \hline
+			16 & 0.337 \\ \hline
+			32 & 0.336 \\ \hline
+			43 & 0.336 \\ \hline
+			37 & 0.335 \\ \hline
+			52 & 0.334 \\ \hline
+			8 & 0.334 \\ \hline
+			46 & 0.33 \\ \hline
+			34 & 0.33 \\ \hline
+			38 & 0.33 \\ \hline
+			41 & 0.33 \\ \hline
+			23 & 0.327 \\ \hline
+			47 & 0.326 \\ \hline
+			4 & 0.325 \\ \hline
+			17 & 0.324 \\ \hline                                                                                        
+		\end{tabular}
+	\end{table}		
+
+	\noindent
+		V tabu¾ke \ref{best-success} sú zobrazené ve¾kosti blokov, pre ktoré je úspešnos najvyššia. Je zaujímave pozorova, e sa v nej nachádzajú všetky mocniny dvojky, ktoré boli 
+		súèasou testovania. Pre ve¾kosti blokov, ktoré sú v tvare $2^n$, má polynóm $x^{2^n}-1$ nad $GF(2)$ rozklad $(x-1)^{2^n}$, teda malı poèet rôznych faktorov a preto vyššia šanca
+		na úspech.
+		
+	\begin{table}[!h]
+		\centering
+		\caption{Vısledky pre najneúspešnejšie ve¾kosti blokov}
+		\label{worst-success}
+		\begin{tabular}{l|l}
+			\textbf{Ve¾kos bloku} & \textbf{Úspešnos (s)} \\ \hline
+			21 & 0.028 \\ \hline
+			42 & 0.03 \\ \hline
+			45 & 0.04 \\ \hline
+			15 & 0.046 \\ \hline
+			30 & 0.047 \\ \hline
+			36 & 0.06 \\ \hline
+			27 & 0.071 \\ \hline
+			35 & 0.072 \\ \hline
+			7 & 0.0733 \\ \hline
+			28 & 0.07375 \\ \hline
+			18 & 0.076 \\ \hline
+			24 & 0.077 \\ \hline
+			49 & 0.077 \\ \hline
+			9 & 0.077 \\ \hline                                                                                   
+		\end{tabular}
+	\end{table}	
+	
+	\noindent
+		V tabu¾ke \ref{worst-success} sú zobrazené vısledky pre bloky, ktoré mali najnišiu úspešnos. Vidie, e vo vısledkoch sú hodnoty, pre ktoré majú polynómy ve¾a faktorov a ich spoloèné násobky.
+		
+\subsection{Vıkonnos LDGM}
+	\noindent
+		Pri testovaní LDGM implementácie sme sa zamerali hlavne na testovanie s odporúèanımi parametrami, ale testovali sme aj to, ako sa prejavia zmeny v parametroch na èasovej zloitosti.
+		Merali sme èasovú zloitos generovania k¾úèov, podpisovania a overovania. Pod¾a odporúèanıch parametrov je ve¾kost generujúcej matice $9800\times4900$ a ve¾kos blokov je $50$. Generujúcu maticu
+		teda tvori $196\times98$ blokov. Testovali sme však aj iné násobky poètu blokov s ve¾kosou blokov. Kede pri generovaní k¾úèov sa poèítajú inverzné matice a èasová zloitos poèítania
+		inverzie závisí kvadraticky od poètú blokov, èím menej blokov tım rıchelšie je generovanie. Toto je vidie aj na vısledkoch testov. Ïalšie zrıchlenie generovania vieme dosiahnu
+		ak zvolíme ve¾kos blokov takú, pre ktorú má polynóm $x^n-1$ málo faktorov. Na druhú stranu, kede chceme maximálne vyui zmenšenie ve¾kosti k¾úèa, je vhodné zvoli ve¾kos bloku v okolí $\sqrt k$, 
+		kde $k$ je ve¾kos generujúcej matice.
+		
+	\begin{figure}[!ht]
+		\label{fig:ldgm_time}
+		\caption{Graf závislosti èasu generovania od poètu ve¾kosti blokov}
+		\centering
+		\includegraphics[width=1\textwidth]{images/ldgm_time.png}
+	\end{figure}	
+		
+	\begin{table}[!h]
+		\centering
+		\caption{Vısledky merní pre LDGM implementáciu}
+		\label{ldgm-time-table}
+		\begin{tabular}{l|l|l|l|l}
+			\textbf{Poèet blokov} & \textbf{Ve¾kos blokov} & \textbf{Generovanie (s)} & \textbf{Podpis (s)} & \textbf{Overovanie(s)} \\ \hline
+            12 & 800 & 0.253 	& 0.0218 	& 0.291 \\ \hline
+            25 & 400 & 0.827 	& 0.01 		& 0.275 \\ \hline
+            49 & 200 & 1.461 	& 0.005 	& 0.224 \\ \hline
+            98 & 100 & 8.641 	& 0.004 	& 0.239 \\ \hline
+            153 & 64 & 9.449 	&  0.009 	& 0.225 \\ \hline
+            196 & 50 & 54.393 	& 0.004 	& 0.221 \\ \hline
+            392 & 25 & 177.634 	& 0.007 	& 0.157 \\ \hline
+		\end{tabular}
+	\end{table}		
+	
+	\noindent
+		Z vısledkov, ktoré sú v tabu¾ke \ref{ldgm-time-table} vychádza, e najlepšie vısledky a najefektívnejšie zmenšenie ve¾kosti k¾úèa je pre
+		ve¾kos bloku 64. 
+		
+	\noindent
+		Pre porovnanie vıkonnosti s RSA2048 uvádzame tabu¾ku s vısledkom merania OpenSSL.
+	
+	\begin{table}[!h]
+		\centering
+		\label{rsa-comp}
+		\begin{tabular}{l|l|l}
+							& \textbf{Podpis (s)} & \textbf{Overovanie (s)}  \\ \hline
+            \textbf{RSA} 	& 0.012 			  & 0.0003				 	 \\ \hline
+            \textbf{LDGM} 	& 0.004 			  & 0.239 					 \\ \hline
+		\end{tabular}
+	\end{table}		
+	
+	
+	
