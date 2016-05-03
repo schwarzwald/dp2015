@@ -4,10 +4,10 @@
 		Bezpeènos takıchto systémov je zaloená na zloitosti takzvaného dekódovacieho problému. V súèasnosti nie je známy algoritmus,
 		ktorı by efektívne dekódoval ¾ubovo¾nı kód ako na klasickom, tak aj na kvantovom poèítaèi. Existujú však triedy lineárnych kódov,
 		ktoré efektívne dekódova vieme. Tento poznatok má kryptografické vyuitie. Podstata code-based kryptosystémov je skonštruova kód,
-		ktorı vieme dekódova a následne tento kód zmodifikova na kód, ktorı dekódova nevieme bez toho, aby sme poznali "inverznú" modifikáciu.
+		ktorı vieme dekódova a následne tento kód zmodifikova na kód, ktorı dekódova nevieme bez toho, aby sme poznali ,,inverznú'' modifikáciu.
 \subsection{McEliece a Niederreiter}
 	\noindent
-		Najstarším a pravdepodobne najznámejším code-based kryptosystémom je McEliecov kryptosystém. Jadro systému tvorí kód $C$ dlky $n$ s
+		Najstarším a pravdepodobne najznámejším code-based kryptosystémom je McElieceov kryptosystém. Jadro systému tvorí kód $C$ dlky $n$ s
 		dimenziou $k$ a minimálnou vzdialenosou $d \geq 2t + 1$, kde t je poèe chıb, ktorı vie kód opravi. Pod¾a pôvodného návrhu sa
 		pouívajú Goppove kódy, ku ktorım existuje efektívny dekódovací algoritmus.
 	\newline
@@ -46,7 +46,7 @@
 		Pre praktickú bezpeènos sa hodnoty parametrov kódu volia pribline $n = 1000, k = 500, t = 50$.
 	
 	\noindent
-		K McEliecovmu kryptosystému existuje varianta, ktorá namiesto generujúcej matice $G$ vyuíva kontrolnú maticu $H$. Táto duálna forma sa oznaèuje ako
+		K McElieceovmu kryptosystému existuje varianta, ktorá namiesto generujúcej matice $G$ vyuíva kontrolnú maticu $H$. Táto duálna forma sa oznaèuje ako
 		Niederreiterov kryptosystém. V tomto kryptosystéme sa správa $m$ najskôr transformuje na vektor $m'$ dåky $n$ s Hammingovou váhou $t$. Funkciu, ktorá vykonáva
 		túto transformáciu oznaèujeme $\phi_{n,t}(m)$.
 		Verejnı k¾úè tvorí matica $H'=SHP$ a parameter $t$.	Matica $S$ je nahodná regulárna binárna matica s rozmermi $(n-k)\times(n-k)$ a 
@@ -79,6 +79,7 @@
 		\end{algorithmic}
 	\end{algorithm}
 		
+	\pagebreak
 	\subsubsection{Porovnanie McEliece a Niederreiter}
 		\noindent 
 			Zhròme si a porovnajme parametre oboch kryptosystémov a ako sa zvolené parametre kódu prejavia na ve¾kosti správ a k¾úèov.

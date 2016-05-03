@@ -76,7 +76,7 @@
 		Implementácia uvedeného algoritmu môe by vylepšená po viacerıch stránkach. Prvé vylepšenie sa dá realizova pri h¾adaní dekódovate¾ného syndrómu. 
 		Na zaèiatku podpisovania si vypoèítame hash samotnej správy $h' = H(m)$ a v ïa¾ších krokoch poèítame $h = H(h' || i)$. Ïalší priestor na vylepšenie, tentokrát
 		dåka vısledného podpisu, sa ponúka v spôsobe uloenia èasti $e$ z podpisu. Autori tejto podpisovej schémy navrhli uklada $e$ ako index $I$ z mnoiny všetkıch $n$ bitovıch
-		vektorov s váhou $t$. To predstavuje èíslo z rozsahu $<1, {n \choose t}>$
+		vektorov s váhou $t$. To predstavuje èíslo z rozsahu $[1, {n \choose t}]$
 		
 	\begin{algorithm}[ht]
 		\caption{Algoritmus overovania v CFS}
@@ -94,8 +94,10 @@
 	
 	\noindent
 		Kede podpis správy tvorí chybové slovo s pevnou váhou, pri parametroch $n = 2^{16}, t = 9$, ktoré navrhli autori, môe by podpis vırazne kompromovanı, èo je znaèná vıhoda
-		oproti schéme, ktorá vyuíva klasickı McEliecov kryptosystém.
-\subsection{LDGM podpis}
+		oproti schéme, ktorá vyuíva klasickı McElieceov kryptosystém.
+
+\pagebreak
+\subsection{LDGM schéma}
 	\noindent
 		Ïalší z monıch návrhov pre code-based kryptografiu sa pokúša zmenši potrebnú ve¾kos k¾úèa pomocou vhodne zvoleného
 		kódu, respektíve pomocou vhodne zvolenej generaènej matice. LDGM (Low-density generation matrix) kódy, èie kódy s riedkou generovaciou maticou
@@ -114,9 +116,9 @@
 		Kadé $C_{i,j}$ je $p \times p$ cirkulatná matica. Vïaka tomu nám staèí uloi z kadého bloku iba jeden riadok. Tım zmenšíme ve¾kos klúèa
 		$p$-násobne. Matica v takomto tvare sa nazıva kvázicyklická (QC). K matici $G$ vypoèítame kontrolnú maticu $H$ v systematickom tvare, t.j. $H = [X | I]$.
 		Kontrolná matica $H$ je súèasou súkromného k¾úèa. Ïalšiu èas k¾úèa tvoria matice $Q$ a $S$.
-		Postup ako urèi maticu $Q$ je zhrnutı v nasledovnom algoritme.
+		Postup ako urèi maticu $Q$ je zjednodušene zhrnutı v algoritme \ref{matrix-Q}.
 		
-	\begin{algorithm}[ht]
+	\begin{algorithm}[!ht]
 		\caption{Vıpoèet matice Q}
 		\label{matrix-Q}
 		\begin{algorithmic}
@@ -143,7 +145,7 @@
 		$m$ vyberie kódové slovo s nízkou váhou $w_c$ z kódu generovaného maticou $G$. 
 		Generovanie podpisu je opísane v nasledovnom algoritme.
 	  
-		\begin{algorithm}[ht]
+		\begin{algorithm}[!ht]
 			\caption{Podpis v LDGM}
 			\label{signature-LDGM}
 			\begin{algorithmic}
@@ -174,9 +176,13 @@
 		\end{algorithm}
 	
 	\noindent
-		Overenie podpisu je rıchle a prebieha takto.
+		Na overenie podpisu najskôr skontrulujeme, èi váha slova, ktoré je vıstupom podpisu, spåòa parametre schémy. 
+		Ïalej potrebujeme zrekonštruova syndróm, ktorı sa pouil na vytvorenie podpisu. Ten tvorí vıstup funkcie $\phi$,
+		ktorej vstup bol hash správy rozšírenej o hodnotnu poèítadla, ktoré je súèasou podpisu. Potom pomocou verejného k¾úèa
+		získame syndróm pre slovo, ktoré tvorí podpis a porovnáme ho so zrekonštruovanım syndrómom. Ak sa zhodujú, popis akceptujeme.
+		Postup je zhrnutı v algoritme \ref{verify-LDGM}.
 		
-	\begin{algorithm}[ht]
+	\begin{algorithm}[!ht]
 		\caption{Overenie v LDGM}
 		\label{verify-LDGM}
 		\begin{algorithmic}
@@ -194,16 +200,17 @@
 					\State \Return $s = s_1$
 				\EndIf
 			\EndIf
-		\end{algorithmic}
-		
-		
-	\noindent
-		
+		\end{algorithmic}		
 	\end{algorithm}
-	\subsubsection{Ukákovı príklad}
+	
+\pagebreak 
+	\noindent
+		Pre lepšiu predstavu ako LDGM podpisová schéma funguje si predvedieme generovanie, podpisovanie a overenie na príklade.
+		
+\pagebreak 
+	\subsection{Ukákovı príklad LDGM}
 		\noindent
-			Pre lepšiu predstavu ako LDGM podpisová schéma funguje si predvedieme generovanie, podpisovanie a overenie na
-			príklade. Hodnoty parametrov pouité v príklade sú odlišné od hodnôt vhodnıch pre praktické vyuitie.
+			Hodnoty parametrov pouité v príklade sú odlišné od hodnôt vhodnıch pre praktické vyuitie.
 		
 		\paragraph{Generovanie k¾úèov}
 			\noindent
@@ -395,7 +402,8 @@
 			
 			\noindent
 				Vidíme, e $s = s_0$ a podpis teda akceptujeme.		
-			
+
+\pagebreak				
 \subsection{Porovnanie}
 	\noindent
 		Pozrime sa na porovnanie CFS a LDGM schémy. 
