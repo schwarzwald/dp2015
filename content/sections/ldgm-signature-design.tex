@@ -1,11 +1,11 @@
 \noindent
 	V tejto èasti uvedieme návrh a implementáciu LDGM podpisovej schémy spolu s konkrétnymi algoritmami
-	na generovanie k¾úèov, podpisov a overovacie funkcie.
+	na generovanie k¾úèov, podpisov a overovanie.
 
 \subsection{Parametre}
 	\noindent
 		Nasledujúca tabu¾ka obsahuje všetky volite¾né parametre a funkcie pre celú podpisovú schému LDGM spolu s odporúèanımi hodnotami na dosiahnutie
-		80 bitovej bezpeènosti
+		80 bitovej bezpeènosti. \cite{baldi2013using}
 
 		\begin{table}[h]
 		\centering
@@ -30,10 +30,10 @@
 \subsection{Funkcia $\phi$}
 	\noindent
 		Dôleitou súèasou pre celú implementáciu, je zvoli funkciu $\phi$, ktorá jednoznaène mapuje vektor dåky $n$
-		na vektor dåky $l$ s váhou $t$. Pre tento úèel zvolíme algoritmus, ktorı navrhol Sendrier v rámci CFS schémy v [xx]. Tento algoritmus má lineárnu zloitos a
+		na vektor dåky $l$ s váhou $t$. Pre tento úèel zvolíme algoritmus, ktorı navrhol Sendrier v rámci CFS schémy v \cite{sendrier2005encoding}. Tento algoritmus má lineárnu zloitos a
 		oproti algoritmu, ktorı pouili autori LDGM schémy ponúka vırazné zrıchlenie celého vıpoètu.
 
-		Implementácia ako ju navrhol Sendrier je uvedená v algoritme \ref{phi-function}.
+		Implementácia ako ju navrhol Sendrier je uvedená v algoritme \ref{phi-function}. \cite{sendrier2005encoding}
 
 		\begin{algorithm}[!ht]
 			\caption{Funkcia $\phi$}
@@ -241,11 +241,11 @@
 		Na to aby sme pomocou jedného riadku mohli eliminova ostatné, potrebujeme nájs vedúci prvok (pivot). V polynomickej reprezentácii to znamená nájs
 		v ståpci prvok, ktorı sa dá invertova modulo $x^n-1$. Inverziu h¾adáme pomocou Euklidovho rozšíreného algoritmu. Ak nájdeme pivot, pripoèítame k ostatnım
 		riadkom takı násobok riadku, ktorı obsahuje pivot, aby sme v ståpci nad aj pod ním dostali nuly. Ak v ståpci pivot nenájdeme, buï matica nie je regulárna
-		a teda inverzia neexistuje, alebo je štruktúra matice taká, e jednoduchou Gaussovou elimináciou nie sme schopní inverziu nájs. Je dôleité zdôrazni, e
+		a teda inverzia neexistuje, alebo je štruktúra matice taká, e jednoduchou Gaussovou elimináciou nie sme schopní inverziu nájs. Je dôleité zdôrazni,
 		e nie sme schopní z vısledku algoritmu urèi èi inverzia existuje alebo nie. Ak inverzia neexistuje, algoritmus je neúspešnı, ale môe nasta prípad keï
 		inverzia existuje ale napriek tomu algoritmus inverziu nevypoèíta.
 	\noindent
-		Úspešnos algoritmu do ve¾kej miery súvisí od ve¾kosti cirkulatnıch blokov. Èím viac faktorov má polynóm $x^n-1$, tım je väèšia šanca, e náhodnı polynóm s ním
+		Úspešnos algoritmu do ve¾kej miery zavisí od ve¾kosti cirkulatnıch blokov. Èím viac faktorov má polynóm $x^n-1$, tım je väèšia šanca, e náhodnı polynóm s ním
 		bude súdelite¾nı a teda k nemu neexistuje inverznı prvok. Ak je malá šanca nájs inverznı prvok, zniuje to celkovú šancu na úspech Gaussovej eliminácie,
 		pretoe nevieme nájs pivot.
 	\noindent
@@ -273,7 +273,7 @@
 					\State $w \gets w_g - 1$
 					\While{$w > 0$}
 						\State $p(x) \gets X[i][rand(n)]$
-						\If{$wt(p(x))) < p$}
+						\If{$wt(p(x)) < p$}
 							\State $addRandBit(p(x))$
 							\State $w \gets w-1$
 						\EndIf
@@ -290,7 +290,7 @@
 	\noindent
 		Matica $Q$ sa skladá z matíc $R$ a $T$, ktoré su blokovo cirkulantné.
 		Matica $R$ vznikne ako Kroneckerov súèin $a^{T}b \otimes 1_{p,p}$. Matice $a$, $b$ náhodne vygenerujeme v závislosti od parametra $z$.
-		Matica $T$ sa skladá z cirkulantnıch matíc s rozmerom $p \times p$. A váha kadého riadku a ståpca je $w_t$, nepárne. Generovanie kvazicyklickıch
+		Matica $T$ sa skladá z cirkulantnıch matíc s rozmerom $p \times p$ a váha kadého riadku a ståpca je $w_t$. Generovanie kvazicyklickıch
 		matíc s pevnou váhou ståpcov a riadkov je popísane v algoritme \ref{gen-const-qc}. 
 		\begin{algorithm}[!h]
 			\caption{Generovanie QC matice s pevnou váhou}
@@ -336,16 +336,16 @@
 
 \subsection{Vıpoèet matice $H_{pub}$}
 	\noindent
-		Predtım, ako sa pustíme do vıpoètu matice $H_{pub}$, potrebjeme inverzné matice ku $Q$ a $S$. Ak nevieme k niektorej z matíc nájs inverziu, opakujeme
+		Predtım, ako sa pustíme do vıpoètu matice $H_{pub}$, potrebujeme inverzné matice ku $Q$ a $S$. Ak nevieme k niektorej z matíc nájs inverziu, opakujeme
 		generovanie a skúsime nájs inverziu znova. Ak sa nám úspešne podarí nájs inverziu k obom maticiam, maticu $H_{pub}$ vypoèítame ako súèin matíc $Q^{-1}HS^{-1}$.
 
 \subsection{Implementácia v BitPunch}
 	\noindent
 		BitPunch je opensource kryptografická kninica napísaná v jazyku C, ktorú postupne vyvíjajú študenti FEI STU. Primárne zameranie kninice je na postkvantovú kryptografiu
-		zaloenej na dekódovacom probléme. Táto práca rozširuje funkènos o digitálne podpisy, konkrétne o LDGM schému.
-		BitPunch obsahoval jednoduchú implementáciu kvázicyklickıch matíc, ktoré sa pouívali pri QC-MDPC implementácii McEliecovho kryptosystému. Táto implementácia však bola
-		prispôsobená špeciálne pre potreby QC-MDPC schémy a musela by rozšírená pre všeobecné pouitie. Do kninice bolo pridanıch ve¾a procedúr, ktoré pracujú s kvázicyklickımi 
-		maticami, vektormi a polynómami nad $GF(2)$.
+		zaloenej na dekódovacom probléme \cite{uhrecky2015dp}. Táto práca rozširuje funkènos o digitálne podpisy, konkrétne o LDGM schému.
+		BitPunch obsahoval jednoduchú implementáciu kvázicyklickıch matíc, ktoré sa pouívali pri QC-MDPC implementácii McElieceovho kryptosystému. Táto implementácia však bola
+		prispôsobená špeciálne pre potreby QC-MDPC schémy a musela by rozšírená pre všeobecné pouitie. Do kninice bolo pridanıch ve¾a funkcií, ktoré pracujú s kvázicyklickımi 
+		maticami, vektormi a polynómami nad $GF(2)$. Dokumentácia je uvedená v prílohe.
 	\noindent
 		Spôsob akım sú digitálne podpisy integrované do BitPunch kninice je naèrtnutı na diagrame. 
 		
@@ -358,7 +358,7 @@
 	
 	\noindent
 		$SignatureContext$ slúi ako premenná prostredia, ktorá obsahuje špecifikáciu kódu
-		a parametre pre podpisovú schému. Štruktúra $CodeSpec$ je implementovaná ako union. Tento spôsob pouívania union dátového typu má simulova návrhovı vzor $Strategy$, ktorı však
+		a parametre pre podpisovú schému. Štruktúra $CodeSpec$ je implementovaná ako union. Tento spôsob pouívania union dátového typu má simulova návrhovı vzor $Strategy$ \cite{vlissides1995design}, ktorı však
 		nie je moné kvalitne implementova v jazyku C, pretoe C nie je objektovo orientovanı jazyk.
 		
 		\begin{figure}[!ht]

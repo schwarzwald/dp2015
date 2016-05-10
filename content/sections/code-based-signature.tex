@@ -4,26 +4,27 @@
 		schémy pomocou postkvantového kryptosystému. Vo všeobecnosti sa na realizáciu digitálneho
 		podpisu vyuívajú asymetrické kryptosystémy, respektíve kryptosystémy s verejnım k¾úèom.
 		Kryptosystémy, ktoré sme si predstavili v predchádzajúcej èasti spåòajú toto kritérium.
-		Všeobecná schéma na vytvorenie digitálneho podpisu správy má pod¾a definície tieto èasti
+		Všeobecná schéma na vytvorenie digitálneho podpisu správy má pod¾a definície \cite{goldreich2009foundations} tieto èasti
 		
 	\begin{description}
 		\item[$\bullet$] Algoritmus na generovanie páru privátnych a verejnıch k¾úèov
 		\item[$\bullet$] Podpisovı algoritmus závislı od privátneho k¾úèa, ktorı vytvorí podpis pre danú správu
-		\item[$\bullet$] Overovací algoritmus závislı od verejného k¾úèa, ktorı pre správu prijme alebo zamietne zodpovedajúci podpis		
+		\item[$\bullet$] Overovací algoritmus závislı od verejného k¾úèa, ktorı pre správu príjme alebo zamietne zodpovedajúci podpis		
 	\end{description}
 	
-	Niektoré kryptosystémy túto schému implementujú tak, e ako podpisovú funkciu pouijú dešifrovací algoritmus s prívatnım k¾úèom a 
+	Niektoré kryptosystémy túto schému implementujú tak, e ako podpisovú funkciu pouijú dešifrovací algoritmus so súkromnım k¾úèom a 
 	ako overovaciu zvolia šifrovací algoritmus s verejnım k¾úèom. Podpis a overenie v tejto implementácii môe vyzera takto 
 	
 	\begin{algorithm}[h]
 		\caption{Schéma digitálneho podpisu}
 		\label{digital-signature}
 		\begin{algorithmic}
-			\State Máme správu $m$, ktorú chceme podpísa a odtlaèkovú funkciu $H$
-			\State Vypoèítame odtlaèok $h = H(m)$
-			\State Vypoèítame podpis tak, e dešifrujeme odtlaèok $h$ pomocou privátneho k¾úèa
-			\State Podpísanú správu tvorí dvojica $(m, s)$
-		\end{algorithmic}
+			\INPUT Správa $m$, odtlaèková funkcia $H$
+			\OUTPUT Podpis správy $m$, ozn. $sig$
+			\State $h \gets H(m)$
+			\State $sig \gets Decode(h, PrivateKey)$
+			\State \Return $sig$
+		\end{algorithmic}	
 	\end{algorithm}
 
 	Monos tejto implmentácie je silne závisla od toho, ako sa
@@ -32,25 +33,24 @@
 
 \subsection{Preh¾ad code-based podpisovıch schém}
 	\noindent
-		V ïalších èastiach práce sa u budeme zaobera iba code-based podpisovımi schémami, teda schémami, ktoré vyuívajú
+		V nasledujúcich èastiach práce sa u budeme zaobera iba code-based podpisovımi schémami, teda schémami, ktoré vyuívajú
 		code-based kryptosystémy. Ve¾kou prekákou tıchto kryptosystémov je v súèasnosti ve¾kos k¾úèa, ktorá je v porovnaní s 
 		dnešnımi kryptosystémami rádovo tisícnásobne väèšia. Pri implementácii a následne v praxi je dôleité nájs vhodnı kompromis
 		medzi poadovanou bezpeènosou a vıpoètovou a dátovou nároènosou, ktorá zavisí od vo¾by ve¾kosti k¾úèa.
 	\newline
-		Existuje nieko¾ko potenciálnych návrhov code-based kryptosystémov, z ktorıch si blišie prejdeme CFS (Courtois-Finiasz-Sendrier) a LDGM (Low-density generator matrix).
+		Existuje nieko¾ko potenciálnych návrhov code-based kryptosystémov, z ktorıch si blišie predstavíme CFS (Courtois-Finiasz-Sendrier) \cite{courtois2001achieve} a LDGM (Low-density generator matrix) \cite{baldi2013using}.
 		
 \subsection{CFS schéma}
 	\noindent 
-		Jednım z nádejnıch návrhov code-based podpisovıch schém je CFS schéma, ktorá pouíva
-		na podpisovanie Niederreiterov kryptosystém.
+		Jednım z nádejnıch návrhov code-based podpisovıch schém je CFS schéma (pomenovaná pod¾a autorov), ktorá pouíva
+		na podpisovanie Niederreiterov kryptosystém .
 		Základnı problém, ktorı treba vyrieši pri podpisovaní zaloenom na kódovaní, je ako získa takı
 		odtlaèok správy, ktorı je dekódovate¾né slovo. Ak máme lineárny kód $C(n,k,2t+1)$, syndróm slova je vektor dåky $n-k$.
-		Poèet všetkıch syndrómov je $2^{n-k}$ a poèet dekódovate¾nıch syndrómov je 
-	\newline 
+		Poèet všetkıch syndrómov je $2^{n-k}$ a poèet dekódovate¾nıch syndrómov je  
 		$\sum_{i=0}^{t}$ $n \choose i$ .
-		To znamená, e $\dfrac{{\sum_{i=0}^{t} {n \choose i}}}{2^{n-k}}$ všetkıch syndrómov je dekódovate¾nıch. Pre Goppove kódy je to pribline $\dfrac{1}{t!}$.
+		To znamená, e $\dfrac{{\sum_{i=0}^{t} {n \choose i}}}{2^{n-k}}$ všetkıch syndrómov je dekódovate¾nıch. Pre Goppove kódy je to pribline $\dfrac{1}{t!}$ \cite{courtois2001achieve}.
 		Pravdepodobnos, e odtlaèok správy bude zároveò dekódovate¾nı, je teda pribline $p = \dfrac{1}{t!}$. Nato, aby sme vedeli podpísa kadú správu, budeme
-		musie ku správe prida bity navyše, a pokúsi sa podpísa túto upravenú správu. Priemernı poèet pokusov na podpísanie jednej správy je pribline $t!$.
+		musie ku správe prida bity navyše a pokúsi sa podpísa túto upravenú správu. Priemernı poèet pokusov na podpísanie jednej správy je pribline $t!$.
 	\newline
 	\begin{algorithm}[h]
 		\caption{Algoritmus podpisovania v CFS}
@@ -61,7 +61,7 @@
 			\State $i \gets 0$
 			\Repeat
 				\State $h \gets H(m || i)$
-				\If{h nie je dekódovate¾né slovo}
+				\If{$h$ nie je dekódovate¾né slovo}
 					\State $i \gets i+1$
 				\EndIf
 			\Until{$h$ je dekódovate¾né slovo}
@@ -76,7 +76,7 @@
 		Implementácia uvedeného algoritmu môe by vylepšená po viacerıch stránkach. Prvé vylepšenie sa dá realizova pri h¾adaní dekódovate¾ného syndrómu. 
 		Na zaèiatku podpisovania si vypoèítame hash samotnej správy $h' = H(m)$ a v ïa¾ších krokoch poèítame $h = H(h' || i)$. Ïalší priestor na vylepšenie, tentokrát
 		dåka vısledného podpisu, sa ponúka v spôsobe uloenia èasti $e$ z podpisu. Autori tejto podpisovej schémy navrhli uklada $e$ ako index $I$ z mnoiny všetkıch $n$ bitovıch
-		vektorov s váhou $t$. To predstavuje èíslo z rozsahu $[1, {n \choose t}]$
+		vektorov s váhou $t$. To predstavuje èíslo z rozsahu $[1, {n \choose t}]$ \cite{courtois2001achieve}
 		
 	\begin{algorithm}[ht]
 		\caption{Algoritmus overovania v CFS}
@@ -93,15 +93,15 @@
 	\end{algorithm}
 	
 	\noindent
-		Kede podpis správy tvorí chybové slovo s pevnou váhou, pri parametroch $n = 2^{16}, t = 9$, ktoré navrhli autori, môe by podpis vırazne kompromovanı, èo je znaèná vıhoda
+		Kede podpis správy tvorí chybové slovo s pevnou váhou, pri parametroch $n = 2^{16}, t = 9$, ktoré navrhli autori, môe by podpis vırazne komprimovanı, èo je znaèná vıhoda
 		oproti schéme, ktorá vyuíva klasickı McElieceov kryptosystém.
 
 \pagebreak
 \subsection{LDGM schéma}
 	\noindent
 		Ïalší z monıch návrhov pre code-based kryptografiu sa pokúša zmenši potrebnú ve¾kos k¾úèa pomocou vhodne zvoleného
-		kódu, respektíve pomocou vhodne zvolenej generaènej matice. LDGM (Low-density generation matrix) kódy, èie kódy s riedkou generovaciou maticou
-		sa v niektorıch prípadoch dajú zapísa kompaktne pomocou cirkulantnıch matíc. Generovacia matica $G$ kódu dåky $n$ s dimenziou $k$ sa skladá
+		kódu, respektíve pomocou vhodne zvolenej generujúcej matice. LDGM (Low-density generator matrix) kódy, èie kódy s generujúcou maticou s nízkou váhou
+		sa v niektorıch prípadoch dajú zapísa kompaktne pomocou cirkulantnıch matíc. Generujúca matica $G$ kódu dåky $n$ s dimenziou $k$ sa skladá
 		z $k_{0}n_{0}$ blokov s rozmermi $p\times p$, kde $n_{0}=n/p$ a $k_{0}=k/p$. 
 		
 		\begin{center} $ G = \begin{bmatrix}
@@ -116,7 +116,7 @@
 		Kadé $C_{i,j}$ je $p \times p$ cirkulatná matica. Vïaka tomu nám staèí uloi z kadého bloku iba jeden riadok. Tım zmenšíme ve¾kos klúèa
 		$p$-násobne. Matica v takomto tvare sa nazıva kvázicyklická (QC). K matici $G$ vypoèítame kontrolnú maticu $H$ v systematickom tvare, t.j. $H = [X | I]$.
 		Kontrolná matica $H$ je súèasou súkromného k¾úèa. Ïalšiu èas k¾úèa tvoria matice $Q$ a $S$.
-		Postup ako urèi maticu $Q$ je zjednodušene zhrnutı v algoritme \ref{matrix-Q}.
+		Postup ako urèi maticu $Q$ je zjednodušene zhrnutı v algoritme \ref{matrix-Q}. \cite{baldi2013using}
 		
 	\begin{algorithm}[!ht]
 		\caption{Vıpoèet matice Q}
@@ -176,9 +176,9 @@
 		\end{algorithm}
 	
 	\noindent
-		Na overenie podpisu najskôr skontrulujeme, èi váha slova, ktoré je vıstupom podpisu, spåòa parametre schémy. 
+		Na overenie podpisu najskôr skontrolujeme, èi váha slova, ktoré je vıstupom podpisu, spåòa parametre schémy. 
 		Ïalej potrebujeme zrekonštruova syndróm, ktorı sa pouil na vytvorenie podpisu. Ten tvorí vıstup funkcie $\phi$,
-		ktorej vstup bol hash správy rozšírenej o hodnotnu poèítadla, ktoré je súèasou podpisu. Potom pomocou verejného k¾úèa
+		ktorej vstup bol hash správy rozšírenej o hodnotu poèítadla, ktoré je súèasou podpisu. Potom pomocou verejného k¾úèa
 		získame syndróm pre slovo, ktoré tvorí podpis a porovnáme ho so zrekonštruovanım syndrómom. Ak sa zhodujú, popis akceptujeme.
 		Postup je zhrnutı v algoritme \ref{verify-LDGM}.
 		
@@ -420,5 +420,5 @@
 	\end{table}
 	
 	\noindent
-		Vidíme, e pri rovnakıch parametroch kódu LDGM schéma ponúka p-násobnú úsporu pamäte. Treba však podotknú, e kódy pouité v kadej 
+		Vidíme, e pri rovnakıch parametroch kódu LDGM schéma ponúka $p$-násobnú úsporu pamäte. Treba však podotknú, e kódy pouité v kadej 
 		schéme sa líšia a z praktického h¾adiska sa volia iné hodnoty parametrov.

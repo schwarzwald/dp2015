@@ -1,14 +1,34 @@
-\noindent
-S príchodom kvantového poèítaèa bude bezpeènos súèasnıch asymetrickıch kryptosystémov povaovaná za nedostatoènú a na zachovanie
-bezpeènosti bude musie svet prejs na nové kryptosystémy, ktoré sú voèi útokom na kvantovom poèítaèi odolné. Odbor, ktorı
-sa zaoberá takımito kryptosystémami sa oznaèuje ako poskvantová kryptografia. Hoci v súèastnosti nebol vydanı èlánok, ktorı by
-naznaèoval, e by nástup vıkonnıch kvantovıch poèítaèov mal prís v najbliších rokoch, treba tento èas vyui na skúmanie
-vhodnıch kandidátov na budúci postkvantovı kryptosystém. Platnos digitálnıch podpisov musí èasto vydrza roky, preto je potrebné
-venova úsilie na vıvoj kryptosystému, ktorı budeme môc povaova za teoreticky bezpeènı aj v budúcnosti s vıkonnım kvantovım poèítaèom.
-U dnes americkı bezpeènostnı úrad NSA h¾adá náhradu a neodporúèa do budúcnosti pouíva eliptické krivky. Práve pre tento úèel vyhlásil 
-NIST súta na návrh budúceho postkvantového kryptografického štandardu. Táto práca má za úlohu preskúma postkvantové asymetrické kryptosystémy 
-a návrhy, ktoré ich vyuívajú na digitálny podpis. Konkrétne sa venuje návrhom kryptosystémov zaloenıch na dekódovacom probléme. 
-Vo všeobenosti tieto kryptosystémy oproti dnešnım  trpia príliš ve¾kım k¾úèom, preto treba h¾ada kódy, pri ktorıch sa dá ve¾kos k¾úèa efektívne
-zmenši a pritom neohrozi bezpeènos systému. Postupne rozoberá návrh McElieceov a k nemu duálny Niederreiterov kryptosystém. Z návrhov
-na digitálny podpis blišie analyzuje CFS a LDGM schému. Ve¾ká èas práce je zameraná na implementáciu LDGM schémy v jazyku C, jeho integrácia
-do kryptografickej kninice BitPunch a testovanie vıkonnosti celej implementácie pri rôznych bezpeènostnıch parametroch. 
+\indent 
+Vo februári 2016 NIST zverejnil správu \cite{chen2016report} v ktorej hodnotí súèasnı stav 
+kryptosystémov a ich bezpeènos v najbliších rokoch. Bezpeènos dnešnıch kryptosystémy
+povauje z dlhodobého h¾adiska za nedostatoènú a vyzıva na návrh budúceho postkvantového
+kryptografického štandardu. Postkvantové kryptosystémy sú odolné voèi známym útokom na 
+kvantovom poèítaèi. Hoci zatia¾ nie je známa praktická realizácia kvantového poèítaèa, 
+na ktorom by bolo moné uskutoèni útoky na dnešné kryptosystémy, vıvoj napreduje a do
+vıskumu sa investuje ve¾a finanènıch prostriedkov. Tento èas treba vyui na vıskum
+a prípravu. 
+\newline \indent 
+V súèasnosti je známych nieko¾ko druhov postkvantovıch asymetrickıch kryptosystémov. \cite{bernstein2009post}
+Jednım z nich sú takzvané code-based kryptosystémy. Tieto kryptosystémy vychádzajú z teorie 
+kódovania a ich bezpeènos je zaloená na dekódovacom probléme, ktorı je NP úplnı. 
+Dekódovací problém znamená, e nie známy algoritmus na dekódovanie pre všeobecnı kód v 
+polynomiálnom èase. Podstata code-based kryptosystémóv je skonštruova kód, pre ktorı 
+poznáme algoritmus na efektívne dekódovanie a následne ho transformova na kód, v ktorom 
+nepoznáme efektívny dekódovací algoritmus. Táto transformácia je väèšinou súèas 
+súkromného k¾úèa.
+\newline \indent 
+Predmetom tejto práce je preskúma známe code-based kryptosystémy a návrhy, ktoré 
+ich vyuívajú na elektronickı podpis a následne implementova vybranú podpisovú schému 
+ako súèas kninice BitPunch \cite{uhrecky2015dp}. V prvej kapitole skúmame niektoré code-based kryptosystémy.
+Konkrétne McElieceov kryptosystém a k nemu duálny Niederreiterov kryptosystém. V závere
+kapitoly je porovnanie tıchto kryptosystémov.
+Druhá kapitola sa venuje code-based podpisovım schémam. Obsahuje najstaršiu CFS schému a
+LDGM schému, ktorá patrí k novším návrhom. Schémy, ktoré boli povaované za zlomené
+pred zaèiatkom písania tejto práce neboli zahrnuté. Na konci kapitoly je uvedenı ukákovı
+príklad, ktorı demonštruje fungovanie LDGM schémy.
+Tretia kapitola obsahuje konkrétny návrh LDGM a implementaèné detaily. Predstavuje algoritmy 
+na generovanie k¾úèov, podpisovanie, overovanie a organizaènú štruktúru v kninici BitPunch.
+Posledná kapitola je venovaná meraniu vıkonnosti implementácie. Obsahuje vısledky testov
+invertovania kvázicyklickıch matíc a vıkonnosti celej podpisovej schémy.
+
+  

@@ -1,19 +1,16 @@
 \subsection{Úvod}
 	\noindent
-		Jednu triedu z postkvantovıch kryptosystémov tvoria code-based systémy, teda kryptosystémy vychádzajúce z teórie kódovania.
-		Bezpeènos takıchto systémov je zaloená na zloitosti takzvaného dekódovacieho problému. V súèasnosti nie je známy algoritmus,
-		ktorı by efektívne dekódoval ¾ubovo¾nı kód ako na klasickom, tak aj na kvantovom poèítaèi. Existujú však triedy lineárnych kódov,
-		ktoré efektívne dekódova vieme. Tento poznatok má kryptografické vyuitie. Podstata code-based kryptosystémov je skonštruova kód,
-		ktorı vieme dekódova a následne tento kód zmodifikova na kód, ktorı dekódova nevieme bez toho, aby sme poznali ,,inverznú'' modifikáciu.
-\subsection{McEliece a Niederreiter}
+		Táto kapitola sa venuje McElieceovmu a Niederreiterovmu kryptosystému. Predstavuje algoritmy na šifrovanie a dešifrovanie
+		a vzájomné porovnanie kryptosystémov.
+\subsection{McEliece}
 	\noindent
-		Najstarším a pravdepodobne najznámejším code-based kryptosystémom je McElieceov kryptosystém. Jadro systému tvorí kód $C$ dlky $n$ s
-		dimenziou $k$ a minimálnou vzdialenosou $d \geq 2t + 1$, kde t je poèe chıb, ktorı vie kód opravi. Pod¾a pôvodného návrhu sa
+		Najstarším a pravdepodobne najznámejším code-based kryptosystémom je McElieceov kryptosystém \cite{mceliece1978public}.  Jadro systému tvorí kód $C$ dlky $n$ s
+		dimenziou $k$ a minimálnou vzdialenosou $d \geq 2t + 1$, kde $t$ je poèet chıb, ktorı vie kód opravi. Pod¾a pôvodného návrhu sa
 		pouívajú Goppove kódy, ku ktorım existuje efektívny dekódovací algoritmus.
 	\newline
 		Verejnı a súkromnı k¾úè zostrojíme nasledovne. Urèíme generujúcu maticu $G$ s rozmermi $k \times n$ pre kód $C$. 
 		Ïalej zvolíme náhodnú binárnu regulárnu maticu $S$ s rozmermi $k \times k$ a permutaènú maticu $P$ s rozmermi
-		$n \times n$. Verejnı k¾úè tvorí matica $G' = SGP$ a parameter $t$. Súkromnı k¾uè tvoria matice $S$, $G$, $P$.
+		$n \times n$. Verejnı k¾úè tvorí matica $G' = SGP$ a parameter $t$. Súkromnı k¾úè tvoria matice $S$, $G$, $P$.
 		
 		\begin{algorithm}[h]
 			\caption{McEliece - Algoritmus šifrovania}
@@ -33,7 +30,7 @@
 			\label{McEliece-decrypt}
 			\begin{algorithmic}
 				\INPUT Zašifrovaná správa $c$
-				\OUTPUT Otvorená správa m
+				\OUTPUT Otvorená správa $m$
 				\State Správu $c$ vynásobíme s $P^{-1}$
 				\State $c' \leftarrow cP^{-1} = mSG + eP^{-1}$
 				\State $m' \leftarrow Decode(c') = mS$;
@@ -43,15 +40,15 @@
 		\end{algorithm}
 		
 	\noindent
-		Pre praktickú bezpeènos sa hodnoty parametrov kódu volia pribline $n = 1000, k = 500, t = 50$.
-	
+		V súèasnosti sa pre praktickú bezpeènos odporúèajú hodnoty parametrov kódu $n = 1833, k = 1356, t = 44$ \cite{niebuhr2012selecting}. 
+\subsection{Niederreiter}
 	\noindent
-		K McElieceovmu kryptosystému existuje varianta, ktorá namiesto generujúcej matice $G$ vyuíva kontrolnú maticu $H$. Táto duálna forma sa oznaèuje ako
-		Niederreiterov kryptosystém. V tomto kryptosystéme sa správa $m$ najskôr transformuje na vektor $m'$ dåky $n$ s Hammingovou váhou $t$. Funkciu, ktorá vykonáva
+		K McElieceovmu kryptosystému existuje variant, ktorı namiesto generujúcej matice $G$ vyuíva kontrolnú maticu $H$. Táto duálna forma je známa ako
+		Niederreiterov kryptosystém \cite{bernstein2009post}.  V tomto kryptosystéme sa správa $m$ najskôr transformuje na vektor $m'$ dåky $n$ s Hammingovou váhou $t$. Funkciu, ktorá vykonáva
 		túto transformáciu oznaèujeme $\phi_{n,t}(m)$.
-		Verejnı k¾úè tvorí matica $H'=SHP$ a parameter $t$.	Matica $S$ je nahodná regulárna binárna matica s rozmermi $(n-k)\times(n-k)$ a 
-		$P$ je permutaèná matica s rozmermi $n \times n$ a súkromnı k¾uè tvoria	matice $S$,$H$,$P$. Šifrovanı text sa vypoèíta ako syndróm slova $m'$, $c = H'm'$$^T$
-		Na dešifrovanie slova $c$ vlastník súkromného k¾úèa najskôr vynásobi slovo $c$ maticou $S^{-1}$ z¾ava, následne aplikuje dekódovací algoritmus a vısledok vynásobí
+		Verejnı k¾úè tvorí matica $H'=SHP$ a parameter $t$.	Matica $S$ je náhodná regulárna binárna matica s rozmermi $(n-k)\times(n-k)$ a 
+		$P$ je permutaèná matica s rozmermi $n \times n$ a súkromnı k¾úè tvoria	matice $S$,$H$,$P$. Šifrovanı text sa vypoèíta ako syndróm slova $m'$, $c = H'm'$$^T$
+		Na dešifrovanie slova $c$ vlastník súkromného k¾úèa najskôr vynásobí slovo $c$ maticou $S^{-1}$ z¾ava, následne aplikuje dekódovací algoritmus a vısledok vynásobí
 		maticou $P^{-1}$ z¾ava. $m = P^{-1}decode(S^{-1}SHPm)$
 		
 		\begin{algorithm}[h]
@@ -80,7 +77,7 @@
 	\end{algorithm}
 		
 	\pagebreak
-	\subsubsection{Porovnanie McEliece a Niederreiter}
+	\subsection{Porovnanie McEliece a Niederreiter}
 		\noindent 
 			Zhròme si a porovnajme parametre oboch kryptosystémov a ako sa zvolené parametre kódu prejavia na ve¾kosti správ a k¾úèov.
 		
