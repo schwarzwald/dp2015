@@ -1,0 +1,42 @@
+LDGM Demo
+
+Aplikacia umoznuje vygenerovat klucovy par, podpisat subor a overit podpis
+Aplikacia sa spusta a ovlada cez prikazovy riadok
+Hladina bezpecnosti je nastavena na 80 bitov s parametrami n = 153, k = 77, p = 64 a nie je mozne ju menit
+Aplikacia je spustitelna na operacnom systeme Windows
+
+Obsahuje tri prikazy
+
+keygen          Vygeneruje par klucov v priecinku z ktoreho je spusteny.
+                Verejny kluc sa ulozi do suboru ldgm80key.pub
+                Sukromny kluc sa ulozi do suboru ldgm80key.pri
+
+sign filename   Podpise subor s danym nazvom. Sukromny kluc sa musi nachadzat
+                v priecinku z ktoreho je aplikacia spustena a musi sa volat ldgm80key.pri
+                Pri uspesnom podpisani sa podpis ulozi do suboru s priponou .sig
+                
+verify filename Overi podpis pre subor s danym menom. Verejny kluc s nazvom ldgm80key.pub 
+                a podpis pre dany subor sa musi nachadzat v priecinku z ktoreho je aplikacia spustena. 
+                Podpis sa musi nachadzat v subore s rovnakym menom ako podpisany subor s priponou .sig
+                Vysledok overovania je vypisany do prikazoveho riadku
+                
+Priklad:
+                
+> ldgm.exe keygen
+Generating keys. This might take a minute...
+Key pair was successfully generated.
+
+-- bol vygenerovany par klucov ldgm80key.pri a ldgm80key.pub
+
+
+> ldgm.exe sign test.pdf
+File test.pdf was successfully signed!
+
+-- bol vytvoreny podpis s nazvom test.pdf.sig
+
+
+> ldgm.exe verify test.pdf
+Signature for the file test.pdf accepted
+
+-- podpis bol akceptovany
+

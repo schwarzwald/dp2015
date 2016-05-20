@@ -5,13 +5,15 @@ Vıkonnos podpisovania tejto implementácie prekonáva RSA2048 v kninici OpenSSL.
 Do budúcnosti ponúka priestor na zlepšenie vıkonnosti overovania, ktoré je momentálne
 pomalšie ako RSA v OpenSSL, treba však doda, e OpenSSL je dlhoroènı projekt, ktorı je
 vysoko optimalizovanı a RSA je lepšie preskúmanı kryptosystém ako LDGM.
+Testovanie implementácie ukázalo, e z praktického h¾adiska je vhodnejšie pouíva iné
+vstupné parametre, ako odporúèajú autori. 
 \newline \indent
-Kapitoly, ktoré sa venovali prieskumu postkvantovıch kryptosystémov a podpisovıch schém, spolu
+Kapitoly, ktoré sa venovali prieskumu postkvantovıch kryptosystémov a podpisovıch schém spolu
 s ukákovım príkladom LDGM schémy boli prezentované vo februári 2016 na konferencii Norwegian-Slovakian Workshop in Crypto
-v nórskom Bergene. 
+v nórskom Bergene \cite{bergen2016}. 
 \newline \indent
 Poèas písania práce boli oznámené nové teoretické útoky na LDGM podpisovú
-schému. Predpokladáme, e autori LDGM schémy v blízkej dobe prídu s uprávami kryptosystému,
+schému. Predpokladáme, e autori LDGM schémy v blízkej dobe prídu s úpravami kryptosystému,
 ktoré zvıšia odolnos voèi predstavenım útokom. Dovtedy môe naša implementácia slúi na
 testovanie a realizáciu monıch útokov.
 

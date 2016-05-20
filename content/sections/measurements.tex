@@ -100,7 +100,7 @@
 	\end{table}		
 
 	\noindent
-		V tabu¾ke \ref{best-success} sú zobrazené ve¾kosti blokov, pre ktoré je úspešnos najvyššia. Je zaujímave pozorova, e sa v nej nachádzajú všetky mocniny dvojky, ktoré boli 
+		V tabu¾ke \ref{best-success} sú zobrazené ve¾kosti blokov, pre ktoré je úspešnos najvyššia. Je zaujímavé pozorova, e sa v nej nachádzajú všetky mocniny dvojky, ktoré boli 
 		súèasou testovania. Pre ve¾kosti blokov, ktoré sú v tvare $2^n$, má polynóm $x^{2^n}-1$ nad $GF(2)$ rozklad $(x-1)^{2^n}$, teda malı poèet rôznych faktorov a preto vyššia šanca
 		na úspech.
 		
@@ -131,16 +131,16 @@
 		
 \subsection{Vıkonnos LDGM}
 	\noindent
-		Pri testovaní LDGM implementácie sme sa zamerali hlavne na testovanie s odporúèanımi parametrami, ale testovali sme aj to, ako sa prejavia zmeny v parametroch na èasovej zloitosti.
+		Pri testovaní LDGM implementácie sme sa zamerali hlavne na testovanie s odporúèanımi parametrami, ale testovali sme aj ako sa prejavia zmeny v parametroch na èasovej zloitosti.
 		Merali sme èasovú zloitos generovania k¾úèov, podpisovania a overovania. Pod¾a odporúèanıch parametrov je ve¾kost generujúcej matice $9800\times4900$ a ve¾kos blokov je $50$. Generujúcu maticu
 		teda tvorí $196\times98$ blokov. Testovali sme však aj iné násobky poètu blokov s ve¾kosou blokov. Kede pri generovaní k¾úèov sa poèítajú inverzné matice a èasová zloitos poèítania
-		inverzie závisí kvadraticky od poètu blokov, èím menej blokov tım rıchelšie je generovanie. Toto je vidie aj na vısledkoch testov. Ïalšie zrıchlenie generovania vieme dosiahnu
+		inverzie závisí kvadraticky od poètu blokov, èím menej blokov tım rıchelšie je generovanie. Toto je vidie aj na vısledkoch testov. Ïalšie zrıchlenie generovania vieme dosiahnu,
 		ak zvolíme ve¾kos blokov takú, pre ktorú má polynóm $x^n-1$ málo faktorov. Na druhú stranu, kede chceme maximálne vyui zmenšenie ve¾kosti k¾úèa, je vhodné zvoli ve¾kos bloku v okolí $\sqrt k$, 
 		kde $k$ je ve¾kos generujúcej matice.
 		
 	\begin{figure}[!ht]
 		\label{fig:ldgm_time}
-		\caption{Graf závislosti èasu generovania od poètu ve¾kosti blokov}
+		\caption{Graf závislosti èasu generovania od ve¾kosti blokov}
 		\centering
 		\includegraphics[width=1\textwidth]{images/ldgm_time.png}
 	\end{figure}	

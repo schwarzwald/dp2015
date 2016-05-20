@@ -5,31 +5,31 @@
 \subsection{Parametre}
 	\noindent
 		Nasledujúca tabu¾ka obsahuje všetky volite¾né parametre a funkcie pre celú podpisovú schému LDGM spolu s odporúèanımi hodnotami na dosiahnutie
-		80 bitovej bezpeènosti. \cite{baldi2013using}
+		80 bitovej a 120 bitovej bezpeènosti. \cite{baldi2013using}
 
 		\begin{table}[h]
 		\centering
 		\caption{Parametre a funkcie LDGM}
 		\label{Parametre a funkcie LDGM}
-			\begin{tabular}{lll}
-			\textbf{Parameter} & \textbf{Popis}       & \textbf{80 bit SL}                                              \\
-			$n$                  & dåka kódu ($n_0p$) &     9800                                               \\
-			$k$                  & dimenzia kódu ($k_0p$)    &   4900                                          \\
-			$p$                  & ve¾kos cirkulantnıch matíc        &      50                           \\
-			$z$                  & poèet riadkov matice $a$,$b$  pozn. ($z \leq (n-k)$)      &     2               \\
-			$w_g$               & váha riadku generujúcej matice $G$    &       20                              \\
-			$w_t$               & váha riadku/ståpca matice $T$           &      1                        \\
-			$w_s$               & váha riadku/ståpca matice $S$     &                 9                   \\
-			$w_c$              & váha slova $c$, ktoré urèuje funkcia $\psi$      &      160                  \\
-			$H$                & hashovacia funkcia    &   -   \\
-			$\psi$                & funkcia, na priradenie slova $c$ k správe $m$   &   -    \\
-			$\phi$                & funkcia, zobrazujúca slová na vektory s pevnou váhou& -
+			\begin{tabular}{llll}
+			\textbf{Par.} & \textbf{Popis}       							& \textbf{SL80} & \textbf{SL120}	\\
+			$n$           & dåka kódu ($n_0p$) 							&	9800		&	24960           \\
+			$k$           & dimenzia kódu ($k_0p$)    						&   4900        &   10000           \\
+			$p$           & ve¾kos cirkulantnıch matíc        				&   50          &   80              \\
+			$z$           & poèet riadkov matice $a$,$b$    				&   2           &   2 				\\
+			$w_g$         & váha riadku generujúcej matice $G$    			&   20          &   25              \\
+			$w_t$         & váha riadku/ståpca matice $T$           		&   1           &   1          		\\
+			$w_s$         & váha riadku/ståpca matice $S$     				&   9           &   14     			\\
+			$w_c$         & váha slova $c$, ktoré urèuje funkcia $\psi$     &   160         &   325      		\\
+			$H$           & hashovacia funkcia    							&   -   & -\\
+			$\psi$        & funkcia, na priradenie slova $c$ k správe $m$   &   -   & - \\
+			$\phi$        & funkcia, zobrazujúca slová na vektory s pevnou váhou& - & -
 			\end{tabular}
 		\end{table}
 
 \subsection{Funkcia $\phi$}
 	\noindent
-		Dôleitou súèasou pre celú implementáciu, je zvoli funkciu $\phi$, ktorá jednoznaène mapuje vektor dåky $n$
+		Dôleitou súèasou pre celú implementáciu je zvoli funkciu $\phi$, ktorá jednoznaène mapuje vektor dåky $n$
 		na vektor dåky $l$ s váhou $t$. Pre tento úèel zvolíme algoritmus, ktorı navrhol Sendrier v rámci CFS schémy v \cite{sendrier2005encoding}. Tento algoritmus má lineárnu zloitos a
 		oproti algoritmu, ktorı pouili autori LDGM schémy ponúka vırazné zrıchlenie celého vıpoètu.
 
@@ -72,18 +72,20 @@
 				\EndFunction
 				
 				\\
+				\\
 				Pozn. $read(n, B)$ je funkcia, ktorá preèíta $n$ bitov z prúdu v desiatkovej reprezentácii a posunie prúd
 				o $n$ bitov. 
 
 			\end{algorithmic}
 		\end{algorithm}
 
+\pagebreak
 \subsection{Funkcia $\psi$}
 	\noindent
 		Na zamaskovanie chybového slova, ktoré tvorí podstatu podpisu a má špecifickı tvar $[0k | s]$ (viï algoritmus \ref{signature-LDGM}), k nemu pripoèítame kódové
 		slovo, ktoré sa odvodí v závislosti od správy. Toto slovo musí ma váhu nišiu alebo rovnú ako predpísanı parameter schémy $w_c$. Existuje
-		ve¾a spôsobov ako takéto slovo urèi a v algoritme \ref{psi-function} je uvedenı postup, ktorı pouívame v našej implementácii.
-		Generujúca matica $G$ je špeciálne vytvorená aby kadı riadok mal vopred urèenú váhu $w_g$ a kede je to náhodná matica s nízkou váhou, je malá pravdepodobnos,
+		ve¾a spôsobov, ako takéto slovo urèi a v algoritme \ref{psi-function} je uvedenı postup, ktorı pouívame v našej implementácii.
+		Generujúca matica $G$ je špeciálne vytvorená, aby kadı riadok mal vopred urèenú váhu $w_g$ a kede je to náhodná matica s nízkou váhou, je malá pravdepodobnos,
 		e jednotky v riadkoch sú na rovnakıch pozíciách. Preto na urèenie slova s váhou menšou alebo rovnou $w_c$ staèí spoèíta $w_c/w_g$ riadkov z matice $G$.
 
 		\begin{algorithm}[ht]
@@ -99,16 +101,19 @@
 				\State $c \gets 0_n$
 
 				\For{$i \gets 0$  \To $count$}
-					\State $index_{row} \gets binToDec(h[(i*b):(i+1)*b])$
+					\State $index_{row} \gets binToDec(h[(ib+1):(i+1)b]) +1$
 					\State $c \gets c \oplus G[index_{row}]$
 				\EndFor
 
 				\State \Return $c$
 
-				\noindent Pozn. $G$ - generujúca matica, $k$ - poèet riadkov $G$, $n$ - dåka $G$, $H$ - hash. funkcia
+				\noindent Pozn. $G$ - generujúca matica, $k$ - poèet riadkov $G$, $H$ - hash. funkcia \\
+				$binToDec$ je funkcia, ktorá pre reazec bitov vráti reprezentáciu v desiatkovej sústave
 			\end{algorithmic}
 		\end{algorithm}
 
+	\noindent
+	V pseudokóde algoritmu \ref{psi-function} predpokladáme, e $\log_2(k)(w_c/w_g) \geq length(H(m))$.
 \subsection{Generovanie k¾úèov}
 	\noindent
 		Generovanie páru k¾úèov sa skladá z viacerıch krokov
@@ -123,7 +128,7 @@
 	\noindent
 		Pseudokód generovania k¾úèov je zhrnutı v algoritme \ref{key-gen}
 
-		\begin{algorithm}[h]
+		\begin{algorithm}[!h]
 			\caption{Generovanie k¾úèov}
 			\label{key-gen}
 			\begin{algorithmic}
@@ -158,11 +163,11 @@
 		\noindent
 		Kadı krok generovania rozoberieme v osobitnej èasti.
 		Pod¾a návrhu schémy potrebujeme inverzné matice $Q^{-1}$ a $S^{-1}$, take matice $Q$ a $S$ musia by regulárne.
-		Pseudokód v algoritme \ref{key-gen} ukazuje, e sme na generovanie matíc $Q$ a $S$ zvolili stratégiu generuj a testuj a teda
+		Pseudokód v algoritme \ref{key-gen} ukazuje, e sme na generovanie matíc $Q$ a $S$ zvolili stratégiu generuj a testuj a teda,
 		ak sa nám nepodarí vygenerovnú maticu invertova, generovanie opakujeme.
 
 		\noindent
-		Invertovanie kvazicyklickıch matíc zohráva pri generovaní k¾úèov podstatnú úlohu. Preto predtım ako si priblíime
+		Invertovanie kvazicyklickıch matíc zohráva pri generovaní k¾úèov podstatnú úlohu. Preto predtım, ako si priblíime
 		algoritmy na generovanie matíc $Q$ a $S$, sa budeme venova invertovaniu kvázicyklickıch matíc.
 
 \subsection{Invertovanie QC matice}
@@ -238,18 +243,18 @@
 
 
 	\noindent
-		Na to aby sme pomocou jedného riadku mohli eliminova ostatné, potrebujeme nájs vedúci prvok (pivot). V polynomickej reprezentácii to znamená nájs
+		Na to, aby sme pomocou jedného riadku mohli eliminova ostatné, potrebujeme nájs vedúci prvok (pivot). V polynomickej reprezentácii to znamená nájs
 		v ståpci prvok, ktorı sa dá invertova modulo $x^n-1$. Inverziu h¾adáme pomocou Euklidovho rozšíreného algoritmu. Ak nájdeme pivot, pripoèítame k ostatnım
 		riadkom takı násobok riadku, ktorı obsahuje pivot, aby sme v ståpci nad aj pod ním dostali nuly. Ak v ståpci pivot nenájdeme, buï matica nie je regulárna
 		a teda inverzia neexistuje, alebo je štruktúra matice taká, e jednoduchou Gaussovou elimináciou nie sme schopní inverziu nájs. Je dôleité zdôrazni,
-		e nie sme schopní z vısledku algoritmu urèi èi inverzia existuje alebo nie. Ak inverzia neexistuje, algoritmus je neúspešnı, ale môe nasta prípad keï
-		inverzia existuje ale napriek tomu algoritmus inverziu nevypoèíta.
+		e nie sme schopní z vısledku algoritmu urèi èi inverzia existuje alebo nie. Ak inverzia neexistuje, algoritmus je neúspešnı, ale môe nasta prípad, keï
+		inverzia existuje, ale napriek tomu algoritmus inverziu nevypoèíta.
 	\noindent
 		Úspešnos algoritmu do ve¾kej miery zavisí od ve¾kosti cirkulatnıch blokov. Èím viac faktorov má polynóm $x^n-1$, tım je väèšia šanca, e náhodnı polynóm s ním
 		bude súdelite¾nı a teda k nemu neexistuje inverznı prvok. Ak je malá šanca nájs inverznı prvok, zniuje to celkovú šancu na úspech Gaussovej eliminácie,
 		pretoe nevieme nájs pivot.
 	\noindent
-		Predchádzajúce tvrdenie sa potvrduje aj vo vısledkoch meraní, ktoré sú uvedené v samostatnej kapitole. Napríklad pri ve¾kosti bloku 21 poèítame s polynómom $x^{21}-1$. Tento
+		Predchádzajúce tvrdenie sa potvrdzuje aj vo vısledkoch meraní, ktoré sú uvedené v samostatnej kapitole. Napríklad pri ve¾kosti bloku 21 poèítame s polynómom $x^{21}-1$. Tento
 		polynóm má rozklad nad $GF(2)$ $(x + 1)(x^2 + x + 1)(x^3 + x + 1)(x^3 + x^2 + 1)(x^6 + x^4 + x^2 + x + 1)(x^6 + x^5 + x^4 + x^2 + 1)$. Polynóm $x^{19}-1$ má rozklad
 		$(x + 1)(x^{18} + x^{17} + x^{16} + x^{15} + x^{14} + x^{13} + x^{12} + x^{11} + x^{10} + x^9 + x^8 + x^7 + x^6 + x^5 + x^4 + x^3 + x^2 + x + 1)$. Invertovanie by teda malo by vırazne
 		úspešnejšie pri velkosti bloku $19$ ako pri ve¾kosti $21$, èo aj potvrdzujú merania.
@@ -258,8 +263,8 @@
 \pagebreak
 \subsection{Generovanie matice $G$}
 	\noindent
-		Generovanie náhodnej matice $G$ je pomerne priamoèiare. $G$ je kvázicyklcká matica tvaru $[I | X]$ kde matica $X$ je náhodná matica, v ktorej kadı riadok má rovnakú váhu. 
-		Parametre ktoré vstupujú do generovania sú poèet blokov v riadku $n$, poèet blokov v ståpci $k$, ve¾kos bloku $p$ a váha riadku $w_g$. Pseudokód generovania je uvedenı v
+		Generovanie náhodnej matice $G$ je pomerne priamoèiare. $G$ je kvázicyklcká matica tvaru $[I | X]$, kde matica $X$ je náhodná matica, v ktorej kadı riadok má rovnakú váhu. 
+		Parametre, ktoré vstupujú do generovania sú poèet blokov v riadku $n$, poèet blokov v ståpci $k$, ve¾kos bloku $p$ a váha riadku $w_g$. Pseudokód generovania je uvedenı v
 		algoritme \ref{gen-g-mat}
 		
 		\begin{algorithm}[!h]
@@ -288,7 +293,7 @@
 		
 \subsection{Generovanie matice $Q$}
 	\noindent
-		Matica $Q$ sa skladá z matíc $R$ a $T$, ktoré su blokovo cirkulantné.
+		Matica $Q$ sa skladá z matíc $R$ a $T$, ktoré sú blokovo cirkulantné.
 		Matica $R$ vznikne ako Kroneckerov súèin $a^{T}b \otimes 1_{p,p}$. Matice $a$, $b$ náhodne vygenerujeme v závislosti od parametra $z$.
 		Matica $T$ sa skladá z cirkulantnıch matíc s rozmerom $p \times p$ a váha kadého riadku a ståpca je $w_t$. Generovanie kvazicyklickıch
 		matíc s pevnou váhou ståpcov a riadkov je popísane v algoritme \ref{gen-const-qc}. 
@@ -347,7 +352,7 @@
 		prispôsobená špeciálne pre potreby QC-MDPC schémy a musela by rozšírená pre všeobecné pouitie. Do kninice bolo pridanıch ve¾a funkcií, ktoré pracujú s kvázicyklickımi 
 		maticami, vektormi a polynómami nad $GF(2)$. Dokumentácia je uvedená v prílohe.
 	\noindent
-		Spôsob akım sú digitálne podpisy integrované do BitPunch kninice je naèrtnutı na diagrame. 
+		Spôsob, akım sú digitálne podpisy integrované do BitPunch kninice je naèrtnutı na diagrame. 
 		
 		\begin{figure}[!ht]
 			\label{fig:bp-diagram}

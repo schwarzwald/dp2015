@@ -1,5 +1,4 @@
-\subsection{Úvod}
-	\noindent
+\noindent
 		Táto kapitola sa venuje McElieceovmu a Niederreiterovmu kryptosystému. Predstavuje algoritmy na šifrovanie a dešifrovanie
 		a vzájomné porovnanie kryptosystémov.
 \subsection{McEliece}
@@ -19,7 +18,7 @@
 				\INPUT Správa $m$ dåky $k$
 				\OUTPUT Zašifrovaná správa c
 				\State $c' \leftarrow mG'$
-				\State Ku zakódovanej správe pripoèítame náhodnı chybovı vektor s váhou $t$.
+				\State K zakódovanej správe pripoèítame náhodnı chybovı vektor s váhou $t$.
 				\State $c \leftarrow c' + e$,  $wt(e) = t$
 				\State \Return $c$
 			\end{algorithmic}		
@@ -40,7 +39,8 @@
 		\end{algorithm}
 		
 	\noindent
-		V súèasnosti sa pre praktickú bezpeènos odporúèajú hodnoty parametrov kódu $n = 1833, k = 1356, t = 44$ \cite{niebuhr2012selecting}. 
+		V súèasnosti sa pre praktickú bezpeènos odporúèajú hodnoty parametrov kódu 
+		\newline\noindent$n = 1833, k = 1356, t = 44$ \cite{niebuhr2012selecting}. 
 \subsection{Niederreiter}
 	\noindent
 		K McElieceovmu kryptosystému existuje variant, ktorı namiesto generujúcej matice $G$ vyuíva kontrolnú maticu $H$. Táto duálna forma je známa ako
@@ -87,15 +87,20 @@
 		\caption{Porovnanie parametrov McEliece a Niederreiter}
 		\label{Porovnanie parametrov McEliece a Niederreiter}
 			\begin{tabular}{l|l|l}
-											   & \textbf{McEliece}   & \textbf{Niederreiter} \\ \hline
-			\textbf{Verejnı k¾úè}              & $G'$, $t$               & $H'$, $t$                 \\ \hline
-			\textbf{Privátny k¾úè}             & $S$, $G$, $P$             & $S$, $H$, $P$              \\ \hline
-			\textbf{Ve¾kos VK}                & $k \times n$               & $n-k \times n$               \\ \hline
-			\textbf{Ve¾kos PK}                & $k \times k$, $k \times n$, $n \times n$ & $n-k \times n-k$, $n-k \times n$, $n \times n$ \\ \hline
-			\textbf{Ve¾kos otvorenej správy}  & $k$                   & $n$                     \\ \hline
-			\textbf{Ve¾kos šifrovanej správy} & $n$                   & $n-k$                   \\ \hline
-			\textbf{Poèet monıch správ}       & $2^k$ & $\sum_{i=0}^{t}$ $n \choose i$       
+											       & \textbf{McEliece}   & \textbf{Niederreiter} \\ \hline
+				\textbf{Verejnı k¾úè}              & $G'$, $t$           & $H'$, $t$             \\ \hline
+				\textbf{Privátny k¾úè}             & $S$, $G$, $P$       & $S$, $H$, $P$         \\ \hline
+				\textbf{Ve¾kos VK}                & $nk$                & $n(n-k)$              \\ \hline
+				\textbf{Ve¾kos PK}                & $n^2+nk+k^2$ 		 & $3(n^2-nk)+k^2$ 		 \\ \hline
+				\textbf{Ve¾kos otvorenej správy}  & $k$                 & $ \log_2{\sum_{i=0}^{t} {n \choose i}}$ \\ \hline
+				\textbf{Ve¾kos šifrovanej správy} & $n$                 & $n-k$                 \\ \hline
+				\textbf{Poèet monıch správ}       & $2^k$ & $\sum_{i=0}^{t} {n \choose i}$       
 			\end{tabular}
 		\end{table}
+		
+		\noindent
+			Pri vhodne zvolenıch parametroch vieme dosiahnut s Niederreiterovım systémom v porovnaní s McElieceom zmenšenie k¾úèov
+			a šifrovaného textu. McEliece však ponúka jednoduchšiu implementáciu a nepotrebuje funkciu na mapovanie otvoreného
+			textu na slová s pevnou váhou.
 		
 	

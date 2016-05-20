@@ -9,7 +9,7 @@
 	\begin{description}
 		\item[$\bullet$] Algoritmus na generovanie páru privátnych a verejnıch k¾úèov
 		\item[$\bullet$] Podpisovı algoritmus závislı od privátneho k¾úèa, ktorı vytvorí podpis pre danú správu
-		\item[$\bullet$] Overovací algoritmus závislı od verejného k¾úèa, ktorı pre správu príjme alebo zamietne zodpovedajúci podpis		
+		\item[$\bullet$] Overovací algoritmus závislı od verejného k¾úèa, ktorı príjme alebo zamietne podpis pre zodpovedajúcu správu 	 	
 	\end{description}
 	
 	Niektoré kryptosystémy túto schému implementujú tak, e ako podpisovú funkciu pouijú dešifrovací algoritmus so súkromnım k¾úèom a 
@@ -68,6 +68,7 @@
 
 			\State $e \gets Decode(h)$
 			\State $sig \gets (e, i)$
+			\State
 			\State \Return $sig$
 		\end{algorithmic}	
 	\end{algorithm}
@@ -82,9 +83,9 @@
 		\caption{Algoritmus overovania v CFS}
 		\label{CFS-digital-signature-verify}
 		\begin{algorithmic}
-			\INPUT Podpis $(e, i)$, správa $m$, verejnı k¾úè $H'$, odtlaèková funkcia $H$ ktorá vracia odtlaèky dåky $n-k$
+			\INPUT Podpis $(e, i)$, správa $m$, verejnı k¾úè $H_{pub}$, odtlaèková funkcia $H$ ktorá vracia odtlaèky dåky $n-k$
 			\OUTPUT True/False - podpis prijímame/zamietame
-			\State $s_1 \gets H'e^{T}$
+			\State $s_1 \gets H_{pub}e^{T}$
 			\State $s_2 \gets H(m || i)$
 
 			\State \Return $s_1 = s_2$
@@ -100,7 +101,7 @@
 \subsection{LDGM schéma}
 	\noindent
 		Ïalší z monıch návrhov pre code-based kryptografiu sa pokúša zmenši potrebnú ve¾kos k¾úèa pomocou vhodne zvoleného
-		kódu, respektíve pomocou vhodne zvolenej generujúcej matice. LDGM (Low-density generator matrix) kódy, èie kódy s generujúcou maticou s nízkou váhou
+		kódu, respektíve pomocou vhodne zvolenej generujúcej matice. LDGM (Low-density generating matrix) kódy, èie kódy s generujúcou maticou s nízkou váhou,
 		sa v niektorıch prípadoch dajú zapísa kompaktne pomocou cirkulantnıch matíc. Generujúca matica $G$ kódu dåky $n$ s dimenziou $k$ sa skladá
 		z $k_{0}n_{0}$ blokov s rozmermi $p\times p$, kde $n_{0}=n/p$ a $k_{0}=k/p$. 
 		
@@ -136,14 +137,14 @@
 		váha kadého riadku aj ståpca bola $w_s$ a aby mala plnú hodnos.
 	
 	\noindent
-		Verejnı k¾úè tvorí upravená kontrolná matica $H' = Q^{-1}HS^{-1}$. Spôsob, ktorım poèítame matice $Q$ a $S$ zachovávajú QC vlastnosti pôvodnej matice $H$,
+		Verejnı k¾úè tvorí upravená kontrolná matica $H_{pub} = Q^{-1}HS^{-1}$. Spôsob, ktorım poèítame matice $Q$ a $S$ zachovávajú QC vlastnosti pôvodnej matice $H$,
 		èo nám umonuje zmenšenie ve¾kosti verejného k¾úèa.
 		
 	\noindent
 		Pri generovaní musíme rieši podobnı problém ako pri CFS schéme. Potrebujeme vıstup z hashovacej funkcie transformova na vektor, ktorı spåòa
 		podmienky urèené štruktúrou kódu. Prepokladajme, e máme funkciu $\phi$, ktorá jednoznaène priradí vektoru dåky $l$ vektor dåky $r$ s váhou $w$ a funkciu $\psi$, ktorá pre kadú správu
 		$m$ vyberie kódové slovo s nízkou váhou $w_c$ z kódu generovaného maticou $G$. 
-		Generovanie podpisu je opísane v nasledovnom algoritme.
+		Generovanie podpisu je formálne zapísané ako Algoritmus \ref{signature-LDGM}.
 	  
 		\begin{algorithm}[!ht]
 			\caption{Podpis v LDGM}
@@ -153,7 +154,7 @@
 				\OUTPUT Podpis správy $m$, ozn. $sig$
 				\State Vypoèítame odtlaèok správy $m$
 				\State $h \gets H(m)$
-				\State $i \gets 0$ , $|h|+|i| = l$
+				\State $i \gets 0$
 				\Repeat
 					\State $s \gets \phi(h || i)$
 					\State $b_1 \gets b \otimes 1_{1,p}$
@@ -196,7 +197,7 @@
 				\If{$wt(s) \neq w$}
 					\State \Return False
 				\Else
-					\State $s_1 \gets H'e'\textsuperscript{T}$
+					\State $s_1 \gets H_{pub}e'\textsuperscript{T}$
 					\State \Return $s = s_1$
 				\EndIf
 			\EndIf
@@ -312,9 +313,9 @@
 			\end{center}
 			
 			\noindent
-				Keï máme matice $Q$ a $S$, môeme vypoèíta maticu $H' = Q^{-1}HS^{-1}$ , ktorá tvorí verejnı k¾úè
+				Keï máme matice $Q$ a $S$, môeme vypoèíta maticu $H_{pub} = Q^{-1}HS^{-1}$ , ktorá tvorí verejnı k¾úè
 			\setcounter{MaxMatrixCols}{20}
-			\begin{center}  $H' = 
+			\begin{center}  $H_{pub} = 
 				\begin{bmatrix}
 							0 & 1 & 1 & 0 & 0 & 1 & 1 & 0 & 0 & 1 & 1 & 1 & 0 & 1 & 1 \\
 							1 & 0 & 1 & 1 & 0 & 0 & 0 & 1 & 0 & 1 & 1 & 1 & 1 & 0 & 1 \\
@@ -390,7 +391,7 @@
 			\noindent
 				Ako prvé overíme, èi $wt(e') \leq (w_t\cdot{w} + w_c)\cdot w_s$. V našom príklade $w_t = 1$, $w = 2$, $w_c = 4$ a $w_s = 1$.
 				Potom $6 \leq (1\cdot 2 + 4)\cdot 1$, $6 \leq 6$
-				Prvá podmienka je splnená. Ïalej pomocou verejného k¾úèa zrekonštruujeme odtlaèok správy $s_0 = H'\cdot e'\textsuperscript{T}$
+				Prvá podmienka je splnená. Ïalej pomocou verejného k¾úèa zrekonštruujeme odtlaèok správy $s_0 = H_{pub}e'\textsuperscript{T}$
 			
 			\begin{center}  $s_0 = 
 				\begin{bmatrix}
@@ -413,8 +414,8 @@
 		\label{cfs-x-ldgm}
 		\begin{tabular}{l|l|l}
 										  & \textbf{CFS}                & \textbf{LDGM}                                                 \\ \hline
-		\textbf{Velkos VK}  & $n - k \times n$                   & \multicolumn{1}{l}{$(n - k \times n) / p$}                          \\ \hline
-		\textbf{Ve¾kos PK} & $n-k \times n-k, n-k \times n, n \times n$ & \multicolumn{1}{l}{$(n-k \times n, n-k \times n -k, n \times n)/p$} \\ \hline
+		\textbf{Velkos VK}  & $(n - k)n$                   & \multicolumn{1}{l}{$(n - k)n/p$}                          \\ \hline
+		\textbf{Ve¾kos PK} & $3(n^2-nk)+k^2$ & \multicolumn{1}{l}{$[3(n^2-nk)+k^2]/p$} \\ \hline
 		\textbf{Ve¾kos podpisu}          & $n$                           & $n$                                                            
 		\end{tabular}
 	\end{table}
